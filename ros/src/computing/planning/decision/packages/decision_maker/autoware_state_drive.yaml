@@ -1,17 +1,10 @@
 ---
-autoware_states_drive:
+autoware_states:
   -
     StateName: Start
     Transition:
       -
         Key: started
-        Target: WaitReady
-    Parent: ~
-  -
-    StateName: WaitReady
-    Transition:
-      -
-        Key: vehicle_is_ready
         Target: WaitEngage
     Parent: ~
   -
@@ -20,19 +13,6 @@ autoware_states_drive:
       -
         Key: operation_start
         Target: Drive
-      -
-        Key: emergency
-        Target: DriveEmergency
-    Parent: ~
-  -
-    StateName: DriveEmergency
-    Transition:
-      -
-        Key: return_from_emergency
-        Target: WaitEngage
-      -
-        Key: return_to_ready
-        Target: WaitEngage
     Parent: ~
   -
     StateName: Drive
@@ -46,9 +26,6 @@ autoware_states_drive:
       -
         Key: operation_end
         Target: WaitEngage
-      -
-        Key: emergency
-        Target: DriveEmergency
     Parent: ~
   -
     StateName: LaneArea
@@ -59,19 +36,22 @@ autoware_states_drive:
       -
         Key: on_bus_stop
         Target: BusStop
+      -
+        Key: emergency
+        Target: LaneAreaEmergency
     Parent: Drive
   -
     StateName: BusStop
     Transition:
       -
-        Key: on_pull_in
-        Target: PullIn
+        Key: on_pull_over
+        Target: PullOver
       -
         Key: on_pull_out
         Target: PullOut
     Parent: LaneArea
   -
-    StateName: PullIn
+    StateName: PullOver
     Transition: []
     Parent: BusStop
   -
@@ -112,9 +92,6 @@ autoware_states_drive:
       -
         Key: wait
         Target: L_Wait
-      -
-        Key: found_obstacle_in_stopped_area
-        Target: L_Stop
     Parent: Cruise
   -
     StateName: L_Stop
@@ -165,9 +142,6 @@ autoware_states_drive:
       -
         Key: wait
         Target: R_Wait
-      -
-        Key: found_obstacle_in_stopped_area
-        Target: R_Stop
     Parent: Cruise
   -
     StateName: R_Stop
@@ -218,9 +192,6 @@ autoware_states_drive:
       -
         Key: wait
         Target: Wait
-      -
-        Key: found_obstacle_in_stopped_area
-        Target: Stop
     Parent: Cruise
   -
     StateName: Stop
@@ -254,6 +225,49 @@ autoware_states_drive:
       -
         Key: found_stopline
         Target: StopLine
+      -
+        Key: completely_stopped
+        Target: TryAvoidance
+    Parent: Straight
+  -
+    StateName: TryAvoidance
+    Transition:
+      -
+        Key: found_path
+        Target: CheckAvoidance
+      -
+        Key: cannot_found_path
+        Target: Go
+    Parent: Straight
+  -
+    StateName: CheckAvoidance
+    Transition:
+      -
+        Key: execute_avoidance
+        Target: Avoidance
+      -
+        Key: avoidance_aborted
+        Target: Go
+    Parent: Straight
+  -
+    StateName: Avoidance
+    Transition:
+      -
+        Key: completed_avoidance
+        Target: ReturnToLane
+      -
+        Key: avoidance_aborted
+        Target: Go
+    Parent: Straight
+  -
+    StateName: ReturnToLane
+    Transition:
+      -
+        Key: completed_return
+        Target: Go
+      -
+        Key: avoidance_aborted
+        Target: Go
     Parent: Straight
   -
     StateName: Back
@@ -264,9 +278,6 @@ autoware_states_drive:
       -
         Key: wait
         Target: B_Wait
-      -
-        Key: found_obstacle_in_stopped_area
-        Target: B_Stop
     Parent: Cruise
   -
     StateName: B_Stop
@@ -343,8 +354,19 @@ autoware_states_drive:
       -
         Key: on_parking
         Target: Parking
+      -
+        Key: emergency
+        Target: FreeAreaEmergency
     Parent: Drive
   -
     StateName: Parking
+    Transition: []
+    Parent: FreeArea
+  -
+    StateName: LaneAreaEmergency
+    Transition: []
+    Parent: LaneArea
+  -
+    StateName: FreeAreaEmergency
     Transition: []
     Parent: FreeArea

@@ -1,5 +1,5 @@
 ---
-autoware_states_mission:
+autoware_states:
   -
     StateName: Start
     Transition:
@@ -40,9 +40,6 @@ autoware_states_mission:
       -
         Key: mission_canceled
         Target: MissionAborted
-      -
-        Key: emergency
-        Target: MissionAborted
     Parent: ~
   -
     StateName: Driving
@@ -52,9 +49,6 @@ autoware_states_mission:
         Target: MissionComplete
       -
         Key: mission_aborted
-        Target: MissionAborted
-      -
-        Key: emergency
         Target: MissionAborted
       -
         Key: request_mission_change
@@ -100,10 +94,4 @@ autoware_states_mission:
       -
         Key: goto_wait_order
         Target: WaitOrder
-      -
-        Key: return_from_emergency
-        Target: WaitVehicleReady
-      -
-        Key: return_to_ready
-        Target: DriveReady
     Parent: ~

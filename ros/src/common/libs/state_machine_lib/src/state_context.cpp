@@ -6,7 +6,6 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include <limits>
 
 #include <fstream>
 
@@ -28,21 +27,21 @@ bool StateContext::setCallback(const CallbackType& _type, const std::string& _st
                                const std::function<void(const std::string&)>& _f)
 {
   bool ret = false;
-  int32_t _state_id = getStateIDbyName(_state_name);
-  if (_state_id != -1 && getStatePtr(static_cast<uint64_t>(_state_id)))
+  uint64_t _state_id = getStateIDbyName(_state_name);
+  if (getStatePtr(_state_id))
   {
     switch (_type)
     {
       case CallbackType::UPDATE:
-        getStatePtr(static_cast<uint64_t>(_state_id))->setCallbackUpdate(_f);
+        getStatePtr(_state_id)->setCallbackUpdate(_f);
         ret = true;
         break;
       case CallbackType::ENTRY:
-        getStatePtr(static_cast<uint64_t>(_state_id))->setCallbackEntry(_f);
+        getStatePtr(_state_id)->setCallbackEntry(_f);
         ret = true;
         break;
       case CallbackType::EXIT:
-        getStatePtr(static_cast<uint64_t>(_state_id))->setCallbackExit(_f);
+        getStatePtr(_state_id)->setCallbackExit(_f);
         ret = true;
         break;
       default:
@@ -77,23 +76,24 @@ bool StateContext::isCurrentState(const std::string& state_name)
 
 void StateContext::nextState(const std::string& transition_key)
 {
+  const std::string dot_output_name = "/tmp/a.dot";
   std::shared_ptr<State> state = root_state_;
   std::string _target_state_name;
-  std::vector<std::string> key_list;
+  std::vector<std::string> key_list_;
 
   while (state)
   {
     if (state->getTransitionMap().count(transition_key) != 0)
     {
       const uint64_t transition_state_id = state->getTransitionMap().at(transition_key);
-      _target_state_name = state_map_.at(transition_state_id)->getStateName();
+      _target_state_name = state_map_[transition_state_id]->getStateName();
 
       if (isCurrentState(_target_state_name))
       {
         return;
       }
 
-      if (state_map_.at(transition_state_id)->getParent())
+      if (state_map_[transition_state_id]->getParent())
       {
         DEBUG_PRINT("[Child]:TransitionState: %d -> %d\n", state->getStateID(), transition_state_id);
 
@@ -101,37 +101,33 @@ void StateContext::nextState(const std::string& transition_key)
 
         do
         {
-          if (in_state == state_map_.at(transition_state_id)->getParent())
+          if (in_state == state_map_[transition_state_id]->getParent())
           {
             if (in_state->getChild())
             {
-              key_list.push_back(in_state->getChild()->getEnteredKey());
+              key_list_.push_back(in_state->getChild()->getEnteredKey());
               in_state->getChild()->onExit();
             }
-            in_state->setChild(state_map_.at(transition_state_id));
+            in_state->setChild(state_map_[transition_state_id]);
             break;
           }
           in_state = in_state->getChild();
         } while (in_state);
 
-#ifdef DEBUG
         createDOTGraph(dot_output_name);
-#endif
-        state_map_.at(transition_state_id)->setEnteredKey(transition_key);
-        state_map_.at(transition_state_id)->onEntry();
+        state_map_[transition_state_id]->setEnteredKey(transition_key);
+        state_map_[transition_state_id]->onEntry();
       }
       else
       {
         DEBUG_PRINT("[Root]:TransitionState: %d -> %d\n", state->getStateID(), transition_state_id);
         state->onExit();
 
-        root_state_ = state_map_.at(transition_state_id);
+        root_state_ = state_map_[transition_state_id];
         root_state_->setChild(nullptr);
         root_state_->setParent(nullptr);
         root_state_->setEnteredKey(transition_key);
-#ifdef DEBUG
         createDOTGraph(dot_output_name);
-#endif
 
         root_state_->onEntry();
       }
@@ -153,11 +149,14 @@ void StateContext::nextState(const std::string& transition_key)
 void StateContext::createGraphTransitionList(std::ofstream& outputfile, int idx,
                                              std::map<uint64_t, std::vector<uint64_t>>& sublist)
 {
-  if (!sublist[idx].empty() || state_map_.at(idx)->getParent() == NULL)
+  /* FIX THIS
+   * Not support single state, which state is integrated before state circle.....;(
+   * */
+  if (!sublist[idx].empty() || state_map_[idx]->getParent() == NULL)
   {
     outputfile << "subgraph cluster_" << idx << "{\n"
-               << "label = \"" << state_map_.at(idx)->getStateName() << "\";\n";
-    if (!state_map_.at(idx)->getParent())
+               << "label = \"" << state_map_[idx]->getStateName() << "\";\n";
+    if (!state_map_[idx]->getParent())
     {
       outputfile << "group = 1;\n";
     }
@@ -168,24 +167,24 @@ void StateContext::createGraphTransitionList(std::ofstream& outputfile, int idx,
     }
   }
 
-  for (auto& map : state_map_.at(idx)->getTransitionMap())
+  for (auto& map : state_map_[idx]->getTransitionMap())
   {
-    if ((state_map_.at(map.second)->getParent() == state_map_.at(idx)->getParent() ||
-         state_map_.at(map.second)->getParent() == state_map_.at(idx)) &&
-        state_map_.at(map.second)->getParent() != NULL)
+    if ((state_map_[map.second]->getParent() == state_map_[idx]->getParent() ||
+         state_map_[map.second]->getParent() == state_map_[idx]) &&
+        state_map_[map.second]->getParent() != NULL)
     {
       outputfile << idx << "->" << map.second << " [label=\"" << map.first << "\"];\n";
     }
   }
-  if (!sublist[idx].empty() || state_map_.at(idx)->getParent() == NULL)
+  if (!sublist[idx].empty() || state_map_[idx]->getParent() == NULL)
   {
     outputfile << "}\n";
   }
-  for (auto& map : state_map_.at(idx)->getTransitionMap())
+  for (auto& map : state_map_[idx]->getTransitionMap())
   {
-    if ((state_map_.at(map.second)->getParent() != state_map_.at(idx)->getParent() &&
-         state_map_.at(map.second)->getParent() != state_map_.at(idx)) ||
-        state_map_.at(map.second)->getParent() == NULL)
+    if ((state_map_[map.second]->getParent() != state_map_[idx]->getParent() &&
+         state_map_[map.second]->getParent() != state_map_[idx]) ||
+        state_map_[map.second]->getParent() == NULL)
     {
       outputfile << idx << "->" << map.second << " [label=\"" << map.first << "\"];\n";
     }
@@ -250,16 +249,16 @@ std::shared_ptr<State> StateContext::getStartState()
   return nullptr;
 }
 
-int32_t StateContext::getStateIDbyName(std::string _name)
+uint64_t StateContext::getStateIDbyName(std::string _name)
 {
   for (const auto& i : state_map_)
   {
     if (i.second->getStateName() == _name)
     {
-      return static_cast<int32_t>(i.second->getStateID());
+      return i.second->getStateID();
     }
   }
-  return -1;
+  return 0;
 }
 
 std::string StateContext::getAvailableTransition(void)
@@ -271,7 +270,7 @@ std::string StateContext::getAvailableTransition(void)
   {
     for (const auto& keyval : state->getTransitionMap())
     {
-      text += keyval.first + ":" + state_map_.at(keyval.second)->getStateName() + ",";
+      text += keyval.first + ":" + state_map_[keyval.second]->getStateName() + ",";
     }
     state = state->getChild();
   } while (state != nullptr);
@@ -297,11 +296,7 @@ void StateContext::setTransitionMap(const YAML::Node& node, const std::shared_pt
 {
   for (unsigned int j = 0; j < node.size(); j++)
   {
-    int32_t state_id = getStateIDbyName(node[j]["Target"].as<std::string>());
-    if (state_id == -1)
-      continue;
-
-    _state->addTransition(node[j]["Key"].as<std::string>(), static_cast<uint64_t>(state_id));
+    _state->addTransition(node[j]["Key"].as<std::string>(), getStateIDbyName(node[j]["Target"].as<std::string>()));
   }
 }
 
@@ -318,20 +313,26 @@ std::shared_ptr<State> StateContext::getStatePtr(const YAML::Node& node)
 {
   return getStatePtr(node["StateName"].as<std::string>());
 }
-
 std::shared_ptr<State> StateContext::getStatePtr(const std::string& _state_name)
 {
-  int32_t state_id = getStateIDbyName(_state_name);
-
-  if (_state_name == "~" || state_id == -1)
+  if (_state_name == "~")
     return nullptr;
   else
-    return getStatePtr(static_cast<uint64_t>(state_id));
+    return getStatePtr(getStateIDbyName(_state_name));
 }
 
 std::shared_ptr<State> StateContext::getStatePtr(const uint64_t& _state_id)
 {
-  return state_map_.at(_state_id);
+  return state_map_[_state_id];
+}
+
+void StateContext::parseChildTransitionMap(const YAML::Node& node)
+{
+  for (unsigned int j = 0; j < node.size(); j++)
+  {
+    setTransitionMap(node[j]["Transition"], getStatePtr(node[j]));
+    parseChildTransitionMap(node[j]["Child"]);
+  }
 }
 
 void StateContext::createStateMap(std::string _state_file_name, std::string _msg_name)
