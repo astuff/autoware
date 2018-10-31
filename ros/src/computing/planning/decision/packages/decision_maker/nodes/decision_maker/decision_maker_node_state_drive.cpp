@@ -2,10 +2,6 @@
 
 namespace decision_maker
 {
-void DecisionMakerNode::updateWaitReadyState(cstring_t& state_name, int status)
-{
-}
-
 void DecisionMakerNode::updateWaitEngageState(cstring_t& state_name, int status)
 {
 }
@@ -87,7 +83,7 @@ uint8_t DecisionMakerNode::getEventStateFromWaypoint(void)
 
     state = current_status_.finalwaypoints.waypoints.at(idx).wpstate.event_state;
 
-    if (state && (state != autoware_msgs::WaypointState::TYPE_EVENT_NULL || distance >= distance_to_target))
+    if (state && distance >= distance_to_target)
     {
       break;
     }
@@ -102,7 +98,7 @@ std::pair<uint8_t, int> DecisionMakerNode::getStopSignStateFromWaypoint(void)
   static const double g = 9.80665;
   static const double margin = 5;
   static const double reaction_time = 0.3 + margin;  // system delay(sec)
-  static const size_t reset_count = stopline_reset_count_;
+  static const size_t reset_count = 20;              //
   const double velocity = amathutils::kmph2mps(current_status_.velocity);
 
   const double free_running_distance = reaction_time * velocity;
@@ -218,7 +214,7 @@ void DecisionMakerNode::updateBusStopState(cstring_t& state_name, int status)
 {
 }
 
-void DecisionMakerNode::updatePullInState(cstring_t& state_name, int status)
+void DecisionMakerNode::updatePullOverState(cstring_t& state_name, int status)
 {
   publishLampCmd(E_Lamp::LAMP_LEFT);
 }
@@ -235,11 +231,6 @@ void DecisionMakerNode::entryTurnState(cstring_t& state_name, int status)
   {
     current_status_.found_stopsign_idx = get_stopsign.second;
     tryNextState("found_stopline");
-    return;
-  }
-  else if (isEventFlagTrue("entry_stop_state"))
-  {
-    tryNextState("found_obstacle_in_stopped_area");
     return;
   }
   tryNextState("clear");
@@ -275,10 +266,14 @@ void DecisionMakerNode::updateRightLaneChangeState(cstring_t& state_name, int st
 
 void DecisionMakerNode::updateCheckLeftLaneState(cstring_t& state_name, int status)
 {
+  /* need safety check function */
+  // static bool is_target_lane_safe = false;
 }
 
 void DecisionMakerNode::updateCheckRightLaneState(cstring_t& state_name, int status)
 {
+  /* need safety check function */
+  // static bool is_target_lane_safe = false;
 }
 
 void DecisionMakerNode::updateChangeToLeftState(cstring_t& state_name, int status)
@@ -299,10 +294,6 @@ void DecisionMakerNode::updateParkingState(cstring_t& state_name, int status)
   publishLampCmd(E_Lamp::LAMP_HAZARD);
 }
 
-void DecisionMakerNode::entryGoState(cstring_t& state_name, int status)
-{
-  setEventFlag("entry_stop_state", false);
-}
 void DecisionMakerNode::updateGoState(cstring_t& state_name, int status)
 {
   std::pair<uint8_t, int> get_stopsign = getStopSignStateFromWaypoint();
@@ -312,6 +303,18 @@ void DecisionMakerNode::updateGoState(cstring_t& state_name, int status)
     tryNextState("found_stopline");
   }
 
+  static double stopped_time;
+  if (current_status_.velocity == 0.0 && current_status_.obstacle_waypoint != -1)
+  {
+    if (ros::Time::now().toSec() - stopped_time > time_to_avoidance_)
+    {
+      tryNextState("completely_stopped");
+    }
+  }
+  else
+  {
+    stopped_time = ros::Time::now().toSec();
+  }
 }
 
 void DecisionMakerNode::updateWaitState(cstring_t& state_name, int status)
@@ -320,10 +323,6 @@ void DecisionMakerNode::updateWaitState(cstring_t& state_name, int status)
   publishStoplineWaypointIdx(current_status_.closest_waypoint + 1);
 }
 
-void DecisionMakerNode::entryStopState(cstring_t& state_name, int status)
-{
-  setEventFlag("entry_stop_state", true);
-}
 void DecisionMakerNode::updateStopState(cstring_t& state_name, int status)
 {
   publishStoplineWaypointIdx(current_status_.closest_waypoint + 1);
@@ -343,7 +342,7 @@ void DecisionMakerNode::updateStoplineState(cstring_t& state_name, int status)
   static bool timerflag = false;
   static ros::Timer stopping_timer;
 
-  if (current_status_.velocity == 0.0 && !timerflag && (current_status_.obstacle_waypoint + current_status_.closest_waypoint) == current_status_.found_stopsign_idx)
+  if (current_status_.velocity == 0.0 && !timerflag)
   {
     stopping_timer = nh_.createTimer(ros::Duration(0.5),
                                      [&](const ros::TimerEvent&) {
@@ -371,17 +370,35 @@ void DecisionMakerNode::exitStopState(cstring_t& state_name, int status)
   }
 }
 
-void DecisionMakerNode::entryDriveEmergencyState(cstring_t& state_name, int status)
+void DecisionMakerNode::entryTryAvoidanceState(cstring_t& state_name, int status)
 {
-  setEventFlag("emergency_flag", true);
-  tryNextState("mission_aborted");
 }
+void DecisionMakerNode::updateTryAvoidanceState(cstring_t& state_name, int status)
+{
+}
+
+void DecisionMakerNode::entryCheckAvoidanceState(cstring_t& state_name, int status)
+{
+}
+void DecisionMakerNode::updateCheckAvoidanceState(cstring_t& state_name, int status)
+{
+}
+
+void DecisionMakerNode::entryAvoidanceState(cstring_t& state_name, int status)
+{
+}
+void DecisionMakerNode::updateAvoidanceState(cstring_t& state_name, int status)
+{
+}
+
+void DecisionMakerNode::entryReturnToLaneState(cstring_t& state_name, int status)
+{
+}
+void DecisionMakerNode::updateReturnToLaneState(cstring_t& state_name, int status)
+{
+}
+
 void DecisionMakerNode::updateDriveEmergencyState(cstring_t& state_name, int status)
 {
 }
-void DecisionMakerNode::exitDriveEmergencyState(cstring_t& state_name, int status)
-{
-  setEventFlag("emergency_flag", false);
-}
-
 }

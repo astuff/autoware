@@ -107,12 +107,8 @@ void DecisionMakerNode::setupStateCallback(void)
                          std::bind(&DecisionMakerNode::updateBusStopState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "Parking",
                          std::bind(&DecisionMakerNode::updateParkingState, this, std::placeholders::_1, 0));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "DriveEmergency",
-                         std::bind(&DecisionMakerNode::entryDriveEmergencyState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "DriveEmergency",
                          std::bind(&DecisionMakerNode::updateDriveEmergencyState, this, std::placeholders::_1, 0));
-  ctx_drive->setCallback(state_machine::CallbackType::EXIT, "DriveEmergency",
-                         std::bind(&DecisionMakerNode::exitDriveEmergencyState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "LeftTurn",
                          std::bind(&DecisionMakerNode::entryTurnState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "LeftTurn",
@@ -137,8 +133,8 @@ void DecisionMakerNode::setupStateCallback(void)
                          std::bind(&DecisionMakerNode::entryLaneChangeState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "RightLaneChange",
                          std::bind(&DecisionMakerNode::updateRightLaneChangeState, this, std::placeholders::_1, 0));
-  ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "PullIn",
-                         std::bind(&DecisionMakerNode::updatePullInState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "PullOver",
+                         std::bind(&DecisionMakerNode::updatePullOverState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "PullOut",
                          std::bind(&DecisionMakerNode::updatePullOutState, this, std::placeholders::_1, 0));
 
@@ -150,15 +146,6 @@ void DecisionMakerNode::setupStateCallback(void)
                          std::bind(&DecisionMakerNode::updateChangeToLeftState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "ChangeToRight",
                          std::bind(&DecisionMakerNode::updateChangeToRightState, this, std::placeholders::_1, 0));
-
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "Go",
-                         std::bind(&DecisionMakerNode::entryGoState, this, std::placeholders::_1, 0));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "L_Go",
-                         std::bind(&DecisionMakerNode::entryGoState, this, std::placeholders::_1, 0));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "R_Go",
-                         std::bind(&DecisionMakerNode::entryGoState, this, std::placeholders::_1, 0));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "B_Go",
-                         std::bind(&DecisionMakerNode::entryGoState, this, std::placeholders::_1, 0));
 
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "Go",
                          std::bind(&DecisionMakerNode::updateGoState, this, std::placeholders::_1, 0));
@@ -186,15 +173,6 @@ void DecisionMakerNode::setupStateCallback(void)
                          std::bind(&DecisionMakerNode::updateStoplineState, this, std::placeholders::_1, 0));
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "B_StopLine",
                          std::bind(&DecisionMakerNode::updateStoplineState, this, std::placeholders::_1, 0));
-
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "Stop",
-                         std::bind(&DecisionMakerNode::entryStopState, this, std::placeholders::_1, 1));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "L_Stop",
-                         std::bind(&DecisionMakerNode::entryStopState, this, std::placeholders::_1, 1));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "R_Stop",
-                         std::bind(&DecisionMakerNode::entryStopState, this, std::placeholders::_1, 1));
-  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "B_Stop",
-                         std::bind(&DecisionMakerNode::entryStopState, this, std::placeholders::_1, 1));
 
   ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "Stop",
                          std::bind(&DecisionMakerNode::updateStopState, this, std::placeholders::_1, 1));
@@ -230,6 +208,23 @@ void DecisionMakerNode::setupStateCallback(void)
   ctx_drive->setCallback(state_machine::CallbackType::EXIT, "B_Stop",
                          std::bind(&DecisionMakerNode::exitStopState, this, std::placeholders::_1, 1));
 
+  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "TryAvoidance",
+                         std::bind(&DecisionMakerNode::entryTryAvoidanceState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "TryAvoidance",
+                         std::bind(&DecisionMakerNode::updateTryAvoidanceState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "CheckAvoidance",
+                         std::bind(&DecisionMakerNode::entryCheckAvoidanceState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "CheckAvoidance",
+                         std::bind(&DecisionMakerNode::updateCheckAvoidanceState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "Avoidance",
+                         std::bind(&DecisionMakerNode::entryAvoidanceState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "Avoidance",
+                         std::bind(&DecisionMakerNode::updateAvoidanceState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::ENTRY, "ReturnToLane",
+                         std::bind(&DecisionMakerNode::entryReturnToLaneState, this, std::placeholders::_1, 0));
+  ctx_drive->setCallback(state_machine::CallbackType::UPDATE, "ReturnToLane",
+                         std::bind(&DecisionMakerNode::updateReturnToLaneState, this, std::placeholders::_1, 0));
+
   ctx_vehicle->nextState("started");
   ctx_mission->nextState("started");
   ctx_drive->nextState("started");
@@ -261,13 +256,18 @@ void DecisionMakerNode::createPublisher(void)
   Pubs["lamp_cmd"] = nh_.advertise<autoware_msgs::LampCmd>("/lamp_cmd", 1);
 
   // for visualize status
+  Pubs["crossroad_marker"] = nh_.advertise<visualization_msgs::MarkerArray>("/state/cross_road_marker", 1);
+  Pubs["stopline_target"] = nh_.advertise<visualization_msgs::Marker>("/state/stopline_target", 1);
+
+  Pubs["crossroad_inside_marker"] = private_nh_.advertise<visualization_msgs::Marker>("/state/cross_inside_marker", 1);
+  Pubs["crossroad_bbox"] = private_nh_.advertise<jsk_recognition_msgs::BoundingBoxArray>("/state/crossroad_bbox", 10);
+
   Pubs["state"] = private_nh_.advertise<std_msgs::String>("state", 1, true);
-  Pubs["state_msg"] = private_nh_.advertise<autoware_msgs::State>("state_msg", 1, true);
-  Pubs["state_overlay"] = private_nh_.advertise<jsk_rviz_plugins::OverlayText>("state_overlay", 1);
+  Pubs["state_overlay"] = private_nh_.advertise<jsk_rviz_plugins::OverlayText>("/state/overlay_text", 1);
   Pubs["available_transition"] = private_nh_.advertise<std_msgs::String>("available_transition", 1, true);
 
   // for debug
-  Pubs["target_velocity_array"] = nh_.advertise<std_msgs::Float64MultiArray>("target_velocity_array", 1);
+  Pubs["target_velocity_array"] = nh_.advertise<std_msgs::Float64MultiArray>("/target_velocity_array", 1);
   Pubs["operator_help_text"] = private_nh_.advertise<jsk_rviz_plugins::OverlayText>("operator_help_text", 1, true);
 }
 
@@ -281,7 +281,90 @@ void DecisionMakerNode::initROS()
   spinners = std::shared_ptr<ros::AsyncSpinner>(new ros::AsyncSpinner(3));
   spinners->start();
 
+#if 0
+  // message setup
+  state_text_msg.width = 400;
+  state_text_msg.height = 500;
+  state_text_msg.top = 10;
+  state_text_msg.left = 10;
+  state_text_msg.bg_color.r = 0;
+  state_text_msg.bg_color.g = 0;
+  state_text_msg.bg_color.b = 0;
+  state_text_msg.bg_color.a = 0.8;
+
+  state_text_msg.line_width = 2;
+  state_text_msg.text_size = 18;
+  state_text_msg.font = "DejaVu Sans Mono";
+  state_text_msg.fg_color.r = 0.1;
+  state_text_msg.fg_color.g = 1.0;
+  state_text_msg.fg_color.b = 0.94;
+  state_text_msg.fg_color.a = 0.8;
+  state_text_msg.text = "UNDEFINED";
+#endif
   update_msgs();
+
+#if 0
+  // status subscriber
+  Subs["sim_pose"] = nh_.subscribe("sim_pose", 20, &DecisionMakerNode::callbackFromSimPose, this);
+  Subs["current_pose"] = nh_.subscribe("current_pose", 20, &DecisionMakerNode::callbackFromCurrentPose, this);
+  Subs["current_velocity"] =
+      nh_.subscribe("current_velocity", 20, &DecisionMakerNode::callbackFromCurrentVelocity, this);
+  Subs["light_color"] = nh_.subscribe("light_color", 10, &DecisionMakerNode::callbackFromLightColor, this);
+  Subs["final_waypoints"] = nh_.subscribe("final_waypoints", 100, &DecisionMakerNode::callbackFromFinalWaypoint, this);
+  Subs["twist_cmd"] = nh_.subscribe("twist_cmd", 10, &DecisionMakerNode::callbackFromTwistCmd, this);
+  Subs["change_flag"] = nh_.subscribe("change_flag", 1, &DecisionMakerNode::callbackFromLaneChangeFlag, this);
+  Subs["state_cmd"] = nh_.subscribe("state_cmd", 1, &DecisionMakerNode::callbackFromStateCmd, this);
+  Subs["closest_waypoint"] =
+      nh_.subscribe("closest_waypoint", 1, &DecisionMakerNode::callbackFromClosestWaypoint, this);
+  Subs["cloud_clusters"] = nh_.subscribe("cloud_clusters", 1, &DecisionMakerNode::callbackFromObjectDetector, this);
+
+  Subs["state_cmd"] = nh_.subscribe("/state_cmd", 1, &DecisionMakerNode::callbackFromStateCmd, this);
+  Subs["current_velocity"] =
+      nh_.subscribe("/current_velocity", 1, &DecisionMakerNode::callbackFromCurrentVelocity, this);
+  Subs["obstacle_waypoint"] =
+      nh_.subscribe("/obstacle_waypoint", 1, &DecisionMakerNode::callbackFromObstacleWaypoint, this);
+  Subs["change_flag"] = nh_.subscribe("/change_flag", 1, &DecisionMakerNode::callbackFromLaneChangeFlag, this);
+}
+void DecisionMakerNode::createPublisher(void)
+{
+  // pub
+  Pubs["state/stopline_wpidx"] = nh_.advertise<std_msgs::Int32>("/state/stopline_wpidx", 1, false);
+
+  // for controlling other planner
+  Pubs["lane_waypoints_array"] = nh_.advertise<autoware_msgs::LaneArray>(TPNAME_CONTROL_LANE_WAYPOINTS_ARRAY, 10, true);
+  Pubs["light_color"] = nh_.advertise<autoware_msgs::TrafficLight>("/light_color_managed", 1);
+
+  // for controlling vehicle
+  Pubs["lamp_cmd"] = nh_.advertise<autoware_msgs::LampCmd>("/lamp_cmd", 1);
+
+  // for visualize status
+  Pubs["state_overlay"] = nh_.advertise<jsk_rviz_plugins::OverlayText>("/state/overlay_text", 1);
+  Pubs["crossroad_marker"] = nh_.advertise<visualization_msgs::MarkerArray>("/state/cross_road_marker", 1);
+  Pubs["crossroad_inside_marker"] = nh_.advertise<visualization_msgs::Marker>("/state/cross_inside_marker", 1);
+  Pubs["crossroad_bbox"] = nh_.advertise<jsk_recognition_msgs::BoundingBoxArray>("/state/crossroad_bbox", 10);
+  Pubs["detection_area"] = nh_.advertise<visualization_msgs::Marker>("/state/detection_area", 1);
+  Pubs["stopline_target"] = nh_.advertise<visualization_msgs::Marker>("/state/stopline_target", 1);
+
+  // for debug
+  Pubs["target_velocity_array"] = nh_.advertise<std_msgs::Float64MultiArray>("target_velocity_array", 1);
+  Pubs["operator_help_text"] = private_nh_.advertise<jsk_rviz_plugins::OverlayText>("operator_help_text", 1, true);
+}
+
+void DecisionMakerNode::initROS()
+{
+  // for subscribe callback function
+
+  ctx->nextState("started");
+
+  spinners = std::shared_ptr<ros::AsyncSpinner>(new ros::AsyncSpinner(3));
+  spinners->start();
+
+  ROS_INFO("Initialized OUT\n");
+  // ctx->setCurrentState(state_machine::LOCATEVEHICLE_STATE);
+
+  Subs["lane_waypoints_array"] =
+      nh_.subscribe(TPNAME_BASED_LANE_WAYPOINTS_ARRAY, 100, &DecisionMakerNode::callbackFromLaneWaypoint, this);
+#endif
 }
 
 void DecisionMakerNode::initVectorMap(void)

@@ -1,5 +1,5 @@
 ---
-autoware_states_vehicle:
+autoware_states:
   -
     StateName: Start
     Transition:
@@ -54,15 +54,12 @@ autoware_states_vehicle:
     Transition:
       -
         Key: emergency
-        Target: VehicleEmergency
+        Target: Emergency
     Parent: ~
   -
-    StateName: VehicleEmergency
+    StateName: Emergency
     Transition:
       -
-        Key: return_from_emergency
+        Key: restart
         Target: Init
-      -
-        Key: return_to_ready
-        Target: VehicleReady
     Parent: ~
