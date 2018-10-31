@@ -67,11 +67,8 @@ add_executable(decision_maker_node
         nodes/decision_maker/decision_maker_node_publish.cpp
         nodes/decision_maker/cross_road_area.cpp
         )
-target_link_libraries(decision_maker_node
-        ${catkin_LIBRARIES}
-        ${vector_map_LIBRARIES}
-        )
-add_dependencies(decision_maker_node autoware_msgs_generate_msgs_cpp ${catkin_EXPORTED_TARGETS})
+target_link_libraries(decision_maker_node ${catkin_LIBRARIES})
+add_dependencies(decision_maker_node ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS decision_maker_node
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -85,33 +82,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
         PATTERN ".svn" EXCLUDE
         )
 
-install(DIRECTORY launch/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-        PATTERN ".svn" EXCLUDE
-        )
-
-install(FILES
-        autoware_state_drive.yaml
-        autoware_state_mission.yaml
-        autoware_state_vehicle.yaml
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(test-decision_maker
-    test/test_decision_maker.test
-    test/src/test_main.cpp
-    test/src/test_node_decision.cpp
-    test/src/test_node_state_drive.cpp
-    nodes/decision_maker/decision_maker_node_core.cpp
-    nodes/decision_maker/decision_maker_node_decision.cpp
-    nodes/decision_maker/decision_maker_node_init.cpp
-    nodes/decision_maker/decision_maker_node_callback.cpp
-    nodes/decision_maker/decision_maker_node_state_vehicle.cpp
-    nodes/decision_maker/decision_maker_node_state_drive.cpp
-    nodes/decision_maker/decision_maker_node_state_mission.cpp
-    nodes/decision_maker/decision_maker_node_publish.cpp
-    nodes/decision_maker/cross_road_area.cpp)
-  add_dependencies(test-decision_maker ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(test-decision_maker ${catkin_LIBRARIES} ${vector_map_LIBRARIES})
-endif()
+# Install config files
+foreach(dir config)
+  install(DIRECTORY ${dir}/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+endforeach(dir)

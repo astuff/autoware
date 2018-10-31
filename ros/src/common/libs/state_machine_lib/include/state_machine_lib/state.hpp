@@ -20,8 +20,9 @@ private:
 
   std::string state_name_;
   uint64_t state_id_;
-
+  
   std::shared_ptr<State> parent_state_;
+  
 
   std::function<void(const std::string&)> CallbackUpdateFunc;
   std::function<void(const std::string&)> CallbackEntryFunc;
@@ -125,12 +126,12 @@ public:
     transition_map_[key] = val;
   }
 
-  uint64_t getTansitionVal(std::string key) const
+  uint64_t getTansitionVal(std::string key)
   {
-    return transition_map_.at(key);
+    return transition_map_[key];
   }
 
-  const std::map<std::string, uint64_t>& getTransitionMap(void)
+  std::map<std::string, uint64_t> getTransitionMap(void)
   {
     return transition_map_;
   }

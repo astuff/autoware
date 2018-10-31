@@ -22,6 +22,9 @@ namespace decision_maker
 void DecisionMakerNode::callbackFromFilteredPoints(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   setEventFlag("received_pointcloud_for_NDT", true);
+
+  /* todo */
+  /* create timer for flags reset   */
 }
 
 void DecisionMakerNode::callbackFromSimPose(const geometry_msgs::PoseStamped& msg)
@@ -44,13 +47,13 @@ void DecisionMakerNode::callbackFromLaneChangeFlag(const std_msgs::Int32& msg)
 void DecisionMakerNode::callbackFromConfig(const autoware_config_msgs::ConfigDecisionMaker& msg)
 {
   ROS_INFO("Param setted by Runtime Manager");
+  enableDisplayMarker = msg.enable_display_marker;
   auto_mission_reload_ = msg.auto_mission_reload;
-  auto_engage_ = msg.auto_engage;
-  auto_mission_change_ = msg.auto_mission_change;
-  use_fms_ = msg.use_fms;
+  use_management_system_ = msg.use_management_system;
   param_num_of_steer_behind_ = msg.num_of_steer_behind;
   change_threshold_dist_ = msg.change_threshold_dist;
   change_threshold_angle_ = msg.change_threshold_angle;
+  time_to_avoidance_ = msg.time_to_avoidance;
   goal_threshold_dist_ = msg.goal_threshold_dist;
   goal_threshold_vel_ = msg.goal_threshold_vel;
   disuse_vector_map_ = msg.disuse_vector_map;
@@ -59,6 +62,53 @@ void DecisionMakerNode::callbackFromConfig(const autoware_config_msgs::ConfigDec
 void DecisionMakerNode::callbackFromLightColor(const ros::MessageEvent<autoware_msgs::TrafficLight const>& event)
 {
   ROS_WARN("%s is not implemented", __func__);
+}
+
+void DecisionMakerNode::callbackFromObjectDetector(const autoware_msgs::CloudClusterArray& msg)
+{
+#if 0
+  // This function is a quick hack implementation.
+  // If detection result exists in DetectionArea, decisionmaker sets object
+  // detection
+  // flag(foundOthervehicleforintersectionstop).
+  // The flag is referenced in the stopline state, and if it is true it will
+  // continue to stop.
+
+  static double setFlagTime = 0.0;
+  bool l_detection_flag = false;
+  if (ctx->isCurrentState(state_machine::DRIVE_STATE))
+  {
+    if (msg.clusters.size())
+    {
+      // if euclidean_cluster does not use wayarea, it may always founded.
+      for (const auto cluster : msg.clusters)
+      {
+        geometry_msgs::PoseStamped cluster_pose;
+        geometry_msgs::PoseStamped baselink_pose;
+        cluster_pose.pose = cluster.bounding_box.pose;
+        cluster_pose.header = cluster.header;
+
+        tflistener_baselink.transformPose(cluster.header.frame_id, cluster.header.stamp, cluster_pose, "base_link",
+                                          baselink_pose);
+
+        if (detectionArea_.x1 * param_detection_area_rate_ >= baselink_pose.pose.position.x &&
+            baselink_pose.pose.position.x >= detectionArea_.x2 * param_detection_area_rate_ &&
+            detectionArea_.y1 * param_detection_area_rate_ >= baselink_pose.pose.position.y &&
+            baselink_pose.pose.position.y >= detectionArea_.y2 * param_detection_area_rate_)
+        {
+          l_detection_flag = true;
+          setFlagTime = ros::Time::now().toSec();
+          break;
+        }
+      }
+    }
+  }
+  /* The true state continues for more than 1 second. */
+  if (l_detection_flag || (ros::Time::now().toSec() - setFlagTime) >= 1.0 /*1.0sec*/)
+  {
+    foundOtherVehicleForIntersectionStop_ = l_detection_flag;
+  }
+#endif
 }
 
 void DecisionMakerNode::insertPointWithinCrossRoad(const std::vector<CrossRoadArea>& _intersects,
@@ -97,6 +147,7 @@ void DecisionMakerNode::insertPointWithinCrossRoad(const std::vector<CrossRoadAr
 
 void DecisionMakerNode::setWaypointState(autoware_msgs::LaneArray& lane_array)
 {
+  // intersects.clear();
   insertPointWithinCrossRoad(intersects, lane_array);
   // STR
   for (auto& area : intersects)
@@ -210,7 +261,6 @@ void DecisionMakerNode::setWaypointState(autoware_msgs::LaneArray& lane_array)
 bool DecisionMakerNode::drivingMissionCheck()
 {
   publishOperatorHelpMessage("Received new mission, checking now...");
-  setEventFlag("received_back_state_waypoint", false);
 
   int gid = 0;
   for (auto& lane : current_status_.based_lane_array.lanes)
@@ -260,7 +310,7 @@ bool DecisionMakerNode::drivingMissionCheck()
   }
 
   double angle_diff_degree =
-      fabs(amathutils::calcPosesAngleDiffDeg(current_status_.pose, nearest_wp_pose));
+      fabs(amathutils::calcPosesAngleDiffRaw(current_status_.pose, nearest_wp_pose)) * 180 / M_PI;
   if (min_dist > change_threshold_dist_ || angle_diff_degree > change_threshold_angle_)
   {
     return false;
@@ -292,6 +342,9 @@ void DecisionMakerNode::callbackFromFinalWaypoint(const autoware_msgs::Lane& msg
 {
   current_status_.finalwaypoints = msg;
   setEventFlag("received_finalwaypoints", true);
+}
+void DecisionMakerNode::callbackFromTwistCmd(const geometry_msgs::TwistStamped& msg)
+{
 }
 
 void DecisionMakerNode::callbackFromClosestWaypoint(const std_msgs::Int32& msg)

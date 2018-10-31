@@ -48,7 +48,6 @@ void DecisionMakerNode::updateSensorInitState(cstring_t& state_name, int status)
   {
     ROS_INFO("DecisionMaker is in simulation mode");
     tryNextState("sensor_is_ready");
-    return;
   }
   else if (isEventFlagTrue("received_pointcloud_for_NDT"))
   {
@@ -66,19 +65,18 @@ void DecisionMakerNode::updateMapInitState(cstring_t& state_name, int status)
 {
   bool vmap_loaded = false;
 
-  g_vmap.subscribe(nh_, Category::POINT | Category::LINE | Category::VECTOR | Category::AREA |
+  g_vmap.subscribe(nh_, Category::POINT | Category::LINE | Category::VECTOR | Category::AREA | Category::DTLANE |
                             Category::STOP_LINE | Category::ROAD_SIGN | Category::CROSS_ROAD,
                    ros::Duration(5.0));
 
   vmap_loaded =
-      g_vmap.hasSubscribed(Category::POINT | Category::LINE | Category::AREA |
-                            Category::STOP_LINE | Category::ROAD_SIGN);
+      g_vmap.hasSubscribed(Category::POINT | Category::LINE | Category::AREA | Category::DTLANE | Category::STOP_LINE);
 
   if (!vmap_loaded)
   {
     ROS_WARN("Necessary vectormap have not been loaded");
     ROS_WARN("DecisionMaker keeps on waiting until it loads");
-    if (disuse_vector_map_)
+    if(disuse_vector_map_)
     {
       ROS_WARN("Disuse vectormap mode.");
       tryNextState("map_is_ready");
@@ -135,10 +133,6 @@ void DecisionMakerNode::entryVehicleReadyState(cstring_t& state_name, int status
 
 void DecisionMakerNode::updateVehicleReadyState(cstring_t& state_name, int status)
 {
-  if (isEventFlagTrue("emergency_flag"))
-  {
-    tryNextState("emergency");
-  }
 }
 
 void DecisionMakerNode::entryVehicleEmergencyState(cstring_t& state_name, int status)

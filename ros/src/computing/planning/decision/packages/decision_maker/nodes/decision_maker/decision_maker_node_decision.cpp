@@ -79,7 +79,7 @@ bool DecisionMakerNode::isLocalizationConvergence(const geometry_msgs::Point& _c
   static std::vector<double> distances;
   static uint32_t distances_count = 0;
   static geometry_msgs::Point prev_point;
-  static const int param_convergence_count = 10;
+  static const int param_convergence_count_ = 10;
 
   bool ret = false;
 
@@ -91,11 +91,11 @@ bool DecisionMakerNode::isLocalizationConvergence(const geometry_msgs::Point& _c
   }
 
   distances.push_back(amathutils::find_distance(prev_point, _current_point));
-  if (++distances_count > param_convergence_count) /* num of count to judge convergence*/
+  if (++distances_count > param_convergence_count_) /* num of count to judge convergence*/
   {
     distances.erase(distances.begin());
     distances_count--;
-    double avg_distances = std::accumulate(distances.begin(), distances.end(), 0.0) / (double)distances.size();
+    double avg_distances = std::accumulate(distances.begin(), distances.end(), 0) / distances.size();
     if (avg_distances <= 2) /*meter*/
     {
       ret = true;
@@ -117,5 +117,13 @@ bool DecisionMakerNode::isArrivedGoal()
     }
   }
   return false;
+}
+bool DecisionMakerNode::handleStateCmd(const uint64_t _state_num)
+{
+  bool _ret = false;
+
+  /* todo  */
+  /* key  */
+  return _ret;
 }
 }
