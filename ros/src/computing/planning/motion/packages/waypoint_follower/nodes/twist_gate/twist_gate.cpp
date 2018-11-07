@@ -259,7 +259,10 @@ void TwistGate::remote_cmd_callback(const remote_msgs_t::ConstPtr& input_msg)
   command_mode_ = static_cast<CommandMode>(input_msg->control_mode);
   emergency_stop_msg_.data = static_cast<bool>(input_msg->vehicle_cmd.emergency);
 
-  if (command_mode_ == CommandMode::REMOTE)
+  // Update Emergency Mode
+  twist_gate_msg_.emergency = input_msg->vehicle_cmd.emergency;
+
+  if (command_mode_ == CommandMode::REMOTE && emergency_stop_msg_.data == false)
   {
     twist_gate_msg_.header.frame_id = input_msg->vehicle_cmd.header.frame_id;
     twist_gate_msg_.header.stamp = input_msg->vehicle_cmd.header.stamp;
