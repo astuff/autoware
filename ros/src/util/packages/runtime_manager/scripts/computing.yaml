@@ -738,11 +738,6 @@ subs :
             depend : use_fms
             depend_bool : 'lambda v : v == 0'
 
-    - name : planner_selector
-      desc : planner_selector desc sample
-      cmd  : roslaunch planner_selector planner_selector.launch
-      param: planner_selector
-
 
 
 buttons:
