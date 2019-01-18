@@ -726,16 +726,18 @@ subs :
       gui  :
           dialog_width  : 400
           dialog_height : 600
-          use_fms:
+          enable_display_marker:
+            flags : [ nl ]
+          use_management_system:
             flags : [ nl ]
           auto_mission_reload:
             depend : use_management_system
             depend_bool : 'lambda v : v == 0'
           auto_engage:
-            depend : use_fms
+            depend : use_management_system
             depend_bool : 'lambda v : v == 0'
           auto_mission_change:
-            depend : use_fms
+            depend : use_management_system
             depend_bool : 'lambda v : v == 0'
 
 
