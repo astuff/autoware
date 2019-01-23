@@ -76,37 +76,6 @@ void DecisionMakerNode::publishOperatorHelpMessage(cstring_t& message)
   Pubs["operator_help_text"].publish(createOverlayText(joined_msg, 0));
 }
 
-void DecisionMakerNode::update_pubsub(void)
-{
-}
-
-int DecisionMakerNode::createCrossRoadAreaMarker(visualization_msgs::Marker& crossroad_marker, double scale)
-{
-  jsk_rviz_plugins::OverlayText ret;
-
-  // message setup
-  ret.width = 500;
-  ret.height = 500;
-  ret.top = 10 + (column * 500);
-  ret.left = 10;
-  ret.bg_color.r = 0;
-  ret.bg_color.g = 0;
-  ret.bg_color.b = 0;
-  ret.bg_color.a = 0.8;
-
-  ret.line_width = 2;
-  ret.text_size = 9;
-  ret.font = "DejaVu Sans Mono";
-  ret.fg_color.r = 1.0;
-  ret.fg_color.g = 1.0;
-  ret.fg_color.b = 0.5;
-  ret.fg_color.a = 0.9;
-
-  ret.text = data;
-
-  return ret;
-}
-
 void DecisionMakerNode::update_msgs(void)
 {
 #if 1
