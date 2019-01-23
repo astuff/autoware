@@ -295,9 +295,6 @@ void DecisionMakerNode::callbackFromFinalWaypoint(const autoware_msgs::Lane& msg
   current_status_.finalwaypoints = msg;
   setEventFlag("received_finalwaypoints", true);
 }
-void DecisionMakerNode::callbackFromTwistCmd(const geometry_msgs::TwistStamped& msg)
-{
-}
 
 void DecisionMakerNode::callbackFromClosestWaypoint(const std_msgs::Int32& msg)
 {
