@@ -67,8 +67,11 @@ add_executable(decision_maker_node
         nodes/decision_maker/decision_maker_node_publish.cpp
         nodes/decision_maker/cross_road_area.cpp
         )
-target_link_libraries(decision_maker_node ${catkin_LIBRARIES})
-add_dependencies(decision_maker_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(decision_maker_node
+        ${catkin_LIBRARIES}
+        ${vector_map_LIBRARIES}
+        )
+add_dependencies(decision_maker_node autoware_msgs_generate_msgs_cpp ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS decision_maker_node
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
