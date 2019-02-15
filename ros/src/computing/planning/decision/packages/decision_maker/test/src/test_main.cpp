@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <ros/ros.h>
 #include <gtest/gtest.h>
+#include <ros/ros.h>
 
 class TestSuite : public ::testing::Test {
 public:
