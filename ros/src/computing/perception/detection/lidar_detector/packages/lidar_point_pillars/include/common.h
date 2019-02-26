@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
+ /**
+ * @file common.h
+ * @brief MACRO for CUDA codes
+ * @author Kosuke Murakami
+ * @date 2019/02/26
+ */
+
+#ifndef   COMMON_H
+#define   COMMON_H
+
 //headers in STL
-#include <iostream>
+#include <stdio.h>
 
-//headers in local files
-#include "point_pillars_ros.h"
+//headers in CUDA
+#include <cuda_runtime_api.h>
 
-int main(int argc, char** argv)
+#define DIVUP(m, n) ((m) / (n) + ((m) % (n) > 0))
+
+#define GPU_CHECK(ans) { GPUAssert((ans), __FILE__, __LINE__); }
+inline void GPUAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
-  ros::init(argc, argv, "lidar_point_pillars");
-  PointPillarsROS app;
-  app.createROSPubSub();
-  ros::spin();
-
-  return 0;
+   if (code != cudaSuccess)
+   {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
 }
+
+#endif  // COMMON_H

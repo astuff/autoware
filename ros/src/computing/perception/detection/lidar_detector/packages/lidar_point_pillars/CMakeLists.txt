@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(lidar_point_pillars)
 
-# set flags for CUDA availability
+# set flags for CUDA and TensorRT availability
 option(CUDA_AVAIL "CUDA available" OFF)
 find_package(CUDA)
 if (CUDA_FOUND)
@@ -14,46 +14,26 @@ else()
   set(CUDA_AVAIL OFF)
 endif (CUDA_FOUND)
 
-# set flags for TensorRT availability
-option(TRT_AVAIL "TensorRT available" OFF)
 # try to find the tensorRT modules
+option(TRT_AVAIL "TensorRT available" OFF)
 find_library(NVINFER NAMES nvinfer)
 find_library(NVPARSERS NAMES nvparsers)
-find_library(NVONNXPARSERS NAMES nvonnxparser)
-if(NVINFER AND NVPARSERS AND NVONNXPARSERS)
-   message("TensorRT is available!")
-   message("NVINFER: ${NVINFER}")
-   message("NVPARSERS: ${NVPARSERS}")
-   message("NVONNXPARSERS: ${NVONNXPARSERS}")
-   set(TRT_AVAIL ON)
+if(NVINFER AND NVPARSERS)
+  message("TensorRT is available!")
+  message("NVINFER: ${NVINFER}")
+  message("NVPARSERS: ${NVPARSERS}")
+  set(TRT_AVAIL ON)
+  add_definitions(-DTRT_AVAIL)
 else()
   message("TensorRT is NOT Available")
   set(TRT_AVAIL OFF)
 endif()
 
-# set flags for CUDNN availability
-option(CUDNN_AVAIL "CUDNN available" OFF)
-# try to find the CUDNN module
-find_library(CUDNN_LIBRARY
-NAMES libcudnn.so${__cudnn_ver_suffix} libcudnn${__cudnn_ver_suffix}.dylib ${__cudnn_lib_win_name}
-PATHS $ENV{LD_LIBRARY_PATH} ${__libpath_cudart} ${CUDNN_ROOT_DIR} ${PC_CUDNN_LIBRARY_DIRS} ${CMAKE_INSTALL_PREFIX}
-PATH_SUFFIXES lib lib64 bin
-DOC "CUDNN library." )
-if(CUDNN_LIBRARY)
-   message("CUDNN is available!")
-   message("CUDNN_LIBRARY: ${CUDNN_LIBRARY}")
-   set(CUDNN_AVAIL ON)
-else()
-  message("CUDNN is NOT Available")
-  set(CUDNN_AVAIL OFF)
-endif()
-
-if(TRT_AVAIL AND CUDA_AVAIL AND CUDNN_AVAIL)
+if(TRT_AVAIL AND CUDA_AVAIL)
 
   find_package(autoware_build_flags REQUIRED)
   find_package(catkin REQUIRED COMPONENTS
    roscpp
-   roslib
    pcl_ros
    autoware_msgs
    )
@@ -63,7 +43,6 @@ if(TRT_AVAIL AND CUDA_AVAIL AND CUDNN_AVAIL)
   catkin_package(
    CATKIN_DEPENDS
    roscpp
-   roslib
    pcl_ros
    autoware_msgs
    )
@@ -101,14 +80,10 @@ if(TRT_AVAIL AND CUDA_AVAIL AND CUDNN_AVAIL)
          nodes/point_pillars.cpp
          nodes/preprocess_points.cpp
          )
-
-   target_link_libraries(point_pillars_lib
-         ${NVINFER}
-         ${NVONNXPARSERS}
-         ${CUDA_LIBRARIES}
-         ${CUDA_CUBLAS_LIBRARIES}
-         ${CUDA_curand_LIBRARY}
-         ${CUDNN_LIBRARY}
+  target_link_libraries(point_pillars_lib
+         ${catkin_LIBRARIES}
+         nvinfer
+         nvonnxparser
          gpu_point_pillars_lib
          )
 
@@ -119,12 +94,10 @@ if(TRT_AVAIL AND CUDA_AVAIL AND CUDNN_AVAIL)
 
 
   install(TARGETS
-         gpu_point_pillars_lib
-         point_pillars_lib
          lidar_point_pillars
          ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
          LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
   )
 
   install(DIRECTORY launch/
@@ -132,7 +105,7 @@ if(TRT_AVAIL AND CUDA_AVAIL AND CUDNN_AVAIL)
          PATTERN ".svn" EXCLUDE)
 
   install(DIRECTORY include/
-         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}/
+         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
          PATTERN ".svn" EXCLUDE
          )
 
@@ -141,8 +114,6 @@ if(TRT_AVAIL AND CUDA_AVAIL AND CUDNN_AVAIL)
     catkin_add_gtest(test-point_pillars test/src/test_point_pillars.cpp)
     target_link_libraries(test-point_pillars ${catkin_LIBRARIES} point_pillars_lib)
   endif()
-else()
-  find_package(catkin REQUIRED)
-  catkin_package()
+ELSE()
   message("PointPillars won't be built, CUDA and/or TensorRT were not found.")
-endif()
+ENDIF ()
