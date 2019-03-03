@@ -14,7 +14,7 @@ def test_plugin_type():
         for frame in plugin.panel().frames:
             print(plugin.path() + " " + str(frame.target))
             yield ok_, guimgr.widget(frame).validate_argtypes(fields, frame)
-            print
+            print()
 
 def test_plugin_field():
     rospack = rospkg.RosPack()
