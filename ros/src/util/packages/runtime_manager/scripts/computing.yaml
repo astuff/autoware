@@ -192,12 +192,10 @@ subs :
         desc : lidar_cnn_segmentation_baidu_detect. Requires Caffe framework
         cmd  : roslaunch lidar_apollo_cnn_seg_detect lidar_apollo_cnn_seg_detect.launch
         param: lidar_cnn_baidu_params
-
       - name : lidar_point_pillars
         desc : lidar_point_pillars. Requires CUDA and TensorRT
         cmd  : roslaunch lidar_point_pillars lidar_point_pillars.launch
         param: lidar_point_pillars_params
-
       - name : lidar_naive_l_shape_detect
         desc : lidar_naive_l_shape_detect desc sample
         cmd  : roslaunch lidar_naive_l_shape_detect lidar_naive_l_shape_detect.launch
