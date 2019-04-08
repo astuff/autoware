@@ -57,13 +57,6 @@ target_link_libraries(autoware_camera_lidar_calibration_node
 )
 add_dependencies(autoware_camera_lidar_calibration_node ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS
-  autoware_camera_lidar_calibration_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 #camera intrinsics node
 catkin_python_setup()
 
@@ -73,6 +66,14 @@ catkin_install_python(PROGRAMS
     scripts/tarfile_calibration.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+install(TARGETS
+  autoware_camera_lidar_calibration_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 
 install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
