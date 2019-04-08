@@ -202,13 +202,15 @@ void SSCInterface::publishCommand()
   unsigned char desired_mode = engage_ ? 1 : 0;
 
   // Speed for SSC speed_model
-  double desired_speed = vehicle_cmd_.ctrl_cmd.linear_velocity;
+  double desired_speed = vehicle_cmd_.twist_cmd.twist.linear.x;
 
   // Curvature for SSC steer_model
   double desired_steering_angle = !use_adaptive_gear_ratio_ ?
                                       vehicle_cmd_.ctrl_cmd.steering_angle :
                                       vehicle_cmd_.ctrl_cmd.steering_angle * ssc_gear_ratio_ / adaptive_gear_ratio_;
-  double desired_curvature = std::tan(desired_steering_angle) / wheel_base_;
+
+  double desired_curvature = vehicle_cmd_.twist_cmd.twist.angular.z / vehicle_cmd_.twist_cmd.twist.linear.x;
+  desired_curvature = desired_speed <= 0 ? 0 : desired_curvature;
 
   // Gear (TODO: Use vehicle_cmd.gear)
   unsigned char desired_gear = engage_ ? automotive_platform_msgs::Gear::DRIVE : automotive_platform_msgs::Gear::NONE;
