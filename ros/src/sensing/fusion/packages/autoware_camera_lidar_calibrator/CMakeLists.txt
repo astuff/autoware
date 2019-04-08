@@ -46,6 +46,13 @@ include_directories(
 link_directories(${PCL_LIBRARY_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 
+install(TARGETS
+  autoware_camera_lidar_calibration_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 #camera lidar node
 add_executable(autoware_camera_lidar_calibration_node
         src/autoware_camera_lidar_calibration/camera_lidar_calibration_node.cpp
