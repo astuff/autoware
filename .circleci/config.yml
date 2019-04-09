@@ -1,0 +1,54 @@
+version: 2
+jobs:
+  kinetic:
+    docker:
+      - image: autonomoustuff/docker-builds:kinetic-perception
+    environment:
+      MAKEFLAGS: -j1
+      COLCON_WORKERS: 3
+    steps:
+      - checkout
+      - run:
+          name: Set Up Container
+          command: |
+            git submodule update --init --recursive
+            apt update -qq && apt install -y libmosquitto-dev gksu python3-pip python3-setuptools
+            pip3 install -U setuptools
+            apt install -y python3-colcon-common-extensions
+      - run:
+          name: Install ROS Dependencies
+          command: |
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            cd ros/src
+            wstool init
+            test -f "dependencies.rosinstall" && wstool merge "dependencies.rosinstall"
+            wstool up
+            cd ..
+            rosdep update && rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+      - run:
+          name: Build
+          command: |
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            cd ros
+            colcon build --cmake-args -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_BUILD_TYPE=Debug --parallel-workers ${COLCON_WORKERS}
+      - run:
+          name: Test
+          command: |
+            source `find /opt/ros -name setup.bash | sort | head -1`
+            cd ros
+            colcon build --cmake-target tests --cmake-args -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_BUILD_TYPE=Debug --parallel-workers ${COLCON_WORKERS}
+            colcon test --parallel-workers ${COLCON_WORKERS}
+            colcon test-result
+#      - run:
+#          name: Run Tests
+#          command: |
+#            source /opt/ros/kinetic/setup.bash
+#            cd ..
+#            catkin run_tests
+#            catkin_test_results
+
+workflows:
+  version: 2
+  ros_build:
+    jobs:
+      - kinetic
