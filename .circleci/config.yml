@@ -5,7 +5,7 @@ jobs:
       - image: autonomoustuff/docker-builds:kinetic-perception
     environment:
       MAKEFLAGS: -j1
-      COLCON_WORKERS: 3
+      COLCON_WORKERS: 2
     steps:
       - checkout
       - run:
