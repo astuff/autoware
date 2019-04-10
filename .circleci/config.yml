@@ -39,13 +39,6 @@ jobs:
             colcon build --cmake-target tests --cmake-args -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_BUILD_TYPE=Debug --parallel-workers ${COLCON_WORKERS}
             colcon test --parallel-workers ${COLCON_WORKERS}
             colcon test-result
-#      - run:
-#          name: Run Tests
-#          command: |
-#            source /opt/ros/kinetic/setup.bash
-#            cd ..
-#            catkin run_tests
-#            catkin_test_results
 
 workflows:
   version: 2
