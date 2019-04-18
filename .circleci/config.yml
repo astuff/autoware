@@ -2,7 +2,7 @@ version: 2
 jobs:
   kinetic:
     docker:
-      - image: autonomoustuff/docker-builds:kinetic-perception
+      - image: autonomoustuff/docker-builds:kinetic-autoware
     environment:
       MAKEFLAGS: -j1
       COLCON_WORKERS: 2
