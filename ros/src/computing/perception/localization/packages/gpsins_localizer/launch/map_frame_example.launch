@@ -1,0 +1,7 @@
+<launch>
+    <!-- Define the transform from the earth to map frame -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="earth_to_map" args="
+        43723.6329509 -4848708.00123 4129913.74804
+        0.417769295288 0.0018835966194 0.00409634355235 0.908541957175
+        earth map" />
+</launch>

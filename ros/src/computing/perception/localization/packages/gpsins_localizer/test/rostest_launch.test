@@ -1,0 +1,15 @@
+<launch>
+    <include file="$(find gpsins_localizer)/launch/gpsins_localizer_node.launch" />
+    <rosparam ns="gpsins_localizer">
+        create_map_frame: true
+        publish_earth_gpsm_tf: true
+    </rosparam>
+
+    <!-- Static TF -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_imu" args="
+        0.3 -0.5 0.4
+        0.0 0.0 0.0
+        base_link imu" />
+
+    <test test-name="GpsInsLocalizerNodeTest" pkg="gpsins_localizer" type="test_gpsins_localizer_node" time-limit="30.0"/>
+</launch>
