@@ -276,7 +276,6 @@ tf2::Quaternion GpsInsLocalizerNl::convertAzimuthToENU(double roll, double pitch
 {
     // Convert from Azimuth (CW from North) to ENU (CCW from East)
     yaw = -yaw + M_PI / 2;
-    // yaw = -yaw;
 
     // Clamp within 0 to 2 pi
     if (yaw > 2 * M_PI)
