@@ -8,6 +8,11 @@ system. Currently, this package depends on the
 message, however it should be easy enough to add support for other
 device-specific message types.
 
+## Dependencies
+
+- [GeogrpahicLib](https://sourceforge.net/projects/geographiclib/). Can be installed via apt (`libgeographic-dev`) or from rosdep (`geographiclib`).
+- [novatel_gps_msgs](https://github.com/swri-robotics/novatel_gps_driver/blob/master/novatel_gps_msgs). Can be installed via apt (`ros-kinetic-novatel-gps-msgs`) or rosdep (`novatel_gps_msgs`).
+
 ## ROS API
 
 #### Subs
