@@ -6,7 +6,6 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra ${CMAKE_CXX_FLAGS}")
 
 set(catkin_deps roscpp roslib nodelet tf2 tf2_ros novatel_gps_msgs sensor_msgs geometry_msgs roslint)
 find_package(catkin REQUIRED ${catkin_deps})
-find_package(GeographicLib REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS include
@@ -34,7 +33,7 @@ add_library(${PROJECT_NAME}_nodelet
 
 target_link_libraries(${PROJECT_NAME}_nodelet
     ${catkin_LIBRARIES}
-    GeographicLib
+    libGeographic.so
 )
 
 # node
