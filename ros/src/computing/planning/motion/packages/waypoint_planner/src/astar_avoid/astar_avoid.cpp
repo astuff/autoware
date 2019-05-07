@@ -350,10 +350,16 @@ void AstarAvoid::publishWaypoints()
     safety_waypoints.header = current_waypoints.header;
     safety_waypoints.increment = current_waypoints.increment;
 
-    // push waypoints from closest index
+    // Build a local path that starts at the current waypoint and goes ahead
+    // "safety_waypoints_size_" waypoints.
+
+    // Use the closest waypoint from lane_select
+    int current_wp_id = closest_waypoint_index_;
+
     for (int i = 0; i < safety_waypoints_size_; ++i)
     {
-      int index = getClosestWaypoint(current_waypoints, current_pose_global_.pose) + i;
+      int index = current_wp_id + i;
+
       if (index < 0 || static_cast<int>(current_waypoints.waypoints.size()) <= index)
       {
         break;
