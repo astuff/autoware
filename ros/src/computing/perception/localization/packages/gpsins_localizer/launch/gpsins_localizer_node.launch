@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="gpsins_localizer" type="gpsins_localizer_node" name="gpsins_localizer" output="screen">
+        <rosparam command="load" file="$(find gpsins_localizer)/config/params.yaml" />
+    </node>
+</launch>
