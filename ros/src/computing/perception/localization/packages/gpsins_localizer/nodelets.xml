@@ -1,0 +1,9 @@
+<library path="lib/libgpsins_localizer_nodelet">
+    <class name="gpsins_localizer/gpsins_localizer_nodelet"
+           type="gpsins_localizer::GpsInsLocalizerNl"
+           base_class_type="nodelet::Nodelet">
+        <description>
+           Localization module based on GPS-INS data
+        </description>
+    </class>
+</library>
