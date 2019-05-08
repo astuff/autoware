@@ -6,13 +6,17 @@ ins_data_topic_name: gps/inspva
 
 # Enable this to "plant" the origin of the map frame at the first received LLH
 # position. If an existing map frame is defined, this should not be set.
-create_map_frame: true
+create_map_frame: false
 
 # Enable if you want to directly publish the measured earth -> gps TF
-publish_earth_gpsm_tf: true
+publish_earth_gpsm_tf: false
 # The name of the measured GPS frame
 measured_gps_frame: gps_measured
 
 # The frame name of the gps sensor, Novatel SPAN devices report data in the imu
 # frame
 static_gps_frame: imu
+
+# Initialize without waiting for "INS_SOLUTION_GOOD" status from the Novatel
+# Use at your own risk
+no_solution_init: false

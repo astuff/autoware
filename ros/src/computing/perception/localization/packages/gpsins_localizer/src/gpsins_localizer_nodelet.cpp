@@ -48,6 +48,7 @@ void GpsInsLocalizerNl::loadParams()
     this->pnh.param("publish_earth_gpsm_tf", this->publish_earth_gpsm_tf, false);
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
     this->pnh.param<std::string>("static_gps_frame", this->static_gps_frame, "gps");
+    this->pnh.param("no_solution_init", this->no_solution_init, false);
     ROS_INFO("Parameters Loaded");
 }
 
@@ -226,7 +227,7 @@ void GpsInsLocalizerNl::checkInitialize(std::string ins_status)
     // Then check if we can initialize
     if (this->map_frame_established && this->gps_frame_established)
     {
-        if (ins_status == "INS_SOLUTION_GOOD")
+        if (ins_status == "INS_SOLUTION_GOOD" || this->no_solution_init)
         {
             this->initialized = true;
             ROS_INFO("Localizer initialized");
