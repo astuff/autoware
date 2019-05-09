@@ -34,61 +34,67 @@ const std::string SIMULATION_FRAME = "sim_base_link";
 const std::string LIDAR_FRAME = "sim_lidar";
 const std::string MAP_FRAME = "map";
 
-geometry_msgs::Pose _initial_pose;
-bool _initial_set = false;
-bool _pose_set = false;
-bool _waypoint_set = false;
-bool _use_ctrl_cmd = false;
-bool g_is_closest_waypoint_subscribed = false;
-WayPoints _current_waypoints;
-ros::Publisher g_odometry_publisher;
-ros::Publisher g_velocity_publisher;
-int32_t g_closest_waypoint = -1;
-double g_position_error;
-double g_angle_error;
-double g_linear_acceleration = 0;
-double g_steering_angle = 0;
-double g_wheel_base_m = 2.7;
+bool initial_set_ = false;
+bool pose_set_ = false;
+bool waypoint_set_ = false;
+bool use_ctrl_cmd = false;
+bool is_closest_waypoint_subscribed_ = false;
+
+geometry_msgs::Pose initial_pose_;
+WayPoints current_waypoints_;
+geometry_msgs::Twist current_velocity_;
+
+ros::Publisher odometry_publisher_;
+ros::Publisher velocity_publisher_;
+
+int32_t closest_waypoint_ = -1;
+double position_error_;
+double angle_error_;
+double linear_acceleration_ = 0;
+double steering_angle_ = 0;
+double lidar_height_ = 1.0;
+double wheel_base_ = 2.7;
 
 constexpr int LOOP_RATE = 50;  // 50Hz
 
 void CmdCallBack(const autoware_msgs::VehicleCmdConstPtr& msg, double accel_rate)
 {
-  if (_use_ctrl_cmd == true)
+  if (use_ctrl_cmd == true)
   {
-    g_linear_acceleration = msg->ctrl_cmd.linear_acceleration;
-    g_steering_angle = msg->ctrl_cmd.steering_angle;
+    linear_acceleration_ = msg->ctrl_cmd.linear_acceleration;
+    steering_angle_ = msg->ctrl_cmd.steering_angle;
   }
   else
   {
     static double previous_linear_velocity = 0;
 
-    if (_current_velocity.linear.x < msg->twist_cmd.twist.linear.x)
+    if (current_velocity_.linear.x < msg->twist_cmd.twist.linear.x)
     {
-      _current_velocity.linear.x = previous_linear_velocity + accel_rate / (double)LOOP_RATE;
+      current_velocity_.linear.x = previous_linear_velocity + accel_rate / (double)LOOP_RATE;
 
-      if (_current_velocity.linear.x > msg->twist_cmd.twist.linear.x)
+      if (current_velocity_.linear.x > msg->twist_cmd.twist.linear.x)
       {
-        _current_velocity.linear.x = msg->twist_cmd.twist.linear.x;
+        current_velocity_.linear.x = msg->twist_cmd.twist.linear.x;
       }
     }
     else
     {
-      _current_velocity.linear.x = previous_linear_velocity - accel_rate / (double)LOOP_RATE;
+      current_velocity_.linear.x = previous_linear_velocity - accel_rate / (double)LOOP_RATE;
 
-      if (_current_velocity.linear.x < msg->twist_cmd.twist.linear.x)
+      if (current_velocity_.linear.x < msg->twist_cmd.twist.linear.x)
       {
-        _current_velocity.linear.x = msg->twist_cmd.twist.linear.x;
+        current_velocity_.linear.x = msg->twist_cmd.twist.linear.x;
       }
     }
 
-    previous_linear_velocity = _current_velocity.linear.x;
+    previous_linear_velocity = current_velocity_.linear.x;
 
-    _current_velocity.angular.z = msg->twist_cmd.twist.angular.z;
+    current_velocity_.angular.z = msg->twist_cmd.twist.angular.z;
 
-    //_current_velocity = msg->twist;
+    //current_velocity_ = msg->twist;
   }
 }
+
 void getTransformFromTF(const std::string parent_frame, const std::string child_frame, tf::StampedTransform& transform)
 {
   static tf::TransformListener listener;
@@ -130,10 +136,8 @@ void callbackFromPoseStamped(const geometry_msgs::PoseStampedConstPtr& msg)
 
 void waypointCallback(const autoware_msgs::LaneConstPtr& msg)
 {
-  // _path_og.setPath(msg);
-  _current_waypoints.setPath(*msg);
-  _waypoint_set = true;
-  // ROS_INFO_STREAM("waypoint subscribed");
+  current_waypoints_.setPath(*msg);
+  waypoint_set_ = true;
 }
 
 void callbackFromClosestWaypoint(const std_msgs::Int32ConstPtr& msg)
@@ -144,11 +148,11 @@ void callbackFromClosestWaypoint(const std_msgs::Int32ConstPtr& msg)
 
 void updateVelocity()
 {
-  if (_use_ctrl_cmd == false)
+  if (use_ctrl_cmd == false)
     return;
 
-  _current_velocity.linear.x += g_linear_acceleration / (double)LOOP_RATE;
-  _current_velocity.angular.z = _current_velocity.linear.x * std::sin(g_steering_angle) / g_wheel_base_m;
+  current_velocity_.linear.x += linear_acceleration_ / (double)LOOP_RATE;
+  current_velocity_.angular.z = current_velocity_.linear.x * std::sin(steering_angle_) / wheel_base_;
 }
 
 void publishOdometry()
@@ -169,21 +173,10 @@ void publishOdometry()
     pose_set_ = true;
   }
 
-  /*int closest_waypoint = getClosestWaypoint(_current_waypoints.getCurrentWaypoints(), pose);
-  if (closest_waypoint == -1)
-  {
-    ROS_INFO("cannot publish odometry because closest waypoint is -1.");
-    return;
-  }
-  else
-  {
-    pose.position.z = _current_waypoints.getWaypointPosition(closest_waypoint).z;
-  }
-*/ if (
-      _waypoint_set && g_is_closest_waypoint_subscribed)
-    pose.position.z = _current_waypoints.getWaypointPosition(g_closest_waypoint).z;
-  double vx = _current_velocity.linear.x;
-  double vth = _current_velocity.angular.z;
+  if (waypoint_set_ && is_closest_waypoint_subscribed_)
+    pose.position.z = current_waypoints_.getWaypointPosition(closest_waypoint_).z;
+  double vx = current_velocity_.linear.x;
+  double vth = current_velocity_.angular.z;
   current_time = ros::Time::now();
 
   // compute odometry in a typical way given the velocities of the robot
@@ -203,15 +196,6 @@ void publishOdometry()
   pose.position.y += delta_y;
   th += delta_th;
   pose.orientation = tf::createQuaternionMsgFromYaw(th);
-
-  // std::cout << "delta (x y th) : (" << delta_x << " " << delta_y << " " <<
-  // delta_th << ")" << std::endl;
-  // std::cout << "current_velocity(linear.x angular.z) : (" <<
-  // _current_velocity.linear.x << " " <<
-  // _current_velocity.angular.z << ")"<< std::endl;
-  //    std::cout << "current_pose : (" << pose.position.x << " " <<
-  //    pose.position.y<< " " << pose.position.z << " " <<
-  //    th << ")" << std::endl << std::endl;
 
   // first, we'll publish the transform over tf
   geometry_msgs::TransformStamped odom_trans;
@@ -273,9 +257,12 @@ int main(int argc, char** argv)
   private_nh.param("accel_rate", accel_rate, double(1.0));
   ROS_INFO_STREAM("accel_rate : " << accel_rate);
 
-  private_nh.param("position_error", g_position_error, double(0.0));
-  private_nh.param("angle_error", g_angle_error, double(0.0));
-  nh.param("vehicle_info/wheel_base", g_wheel_base_m, double(2.7));
+  private_nh.param("position_error", position_error_, double(0.0));
+  private_nh.param("angle_error", angle_error_, double(0.0));
+  private_nh.param("lidar_height", lidar_height_, double(1.0));
+  private_nh.param("use_ctrl_cmd", use_ctrl_cmd, false);
+
+  nh.param("vehicle_info/wheel_base", wheel_base_, double(2.7));
 
   // publish topic
   odometry_publisher_ = nh.advertise<geometry_msgs::PoseStamped>("sim_pose", 10);
