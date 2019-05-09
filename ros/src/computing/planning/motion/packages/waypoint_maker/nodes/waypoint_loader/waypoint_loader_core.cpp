@@ -53,31 +53,7 @@ void WaypointLoaderNode::createLaneArray(const std::vector<std::string>& paths, 
   {
     autoware_msgs::Lane lane;
     createLaneWaypoint(el, &lane);
-    if (replanning_mode_)
-    {
-      replanner_.replanLaneWaypointVel(&lane);
-    }
-    lane_array->lanes.push_back(lane);
-  }
-}
-
-void WaypointLoaderNode::saveLaneArray(const std::vector<std::string>& paths,
-                                       const autoware_msgs::LaneArray& lane_array)
-{
-  unsigned long idx = 0;
-  for (const auto& file_path : paths)
-  {
-    std::ofstream ofs(file_path.c_str());
-    ofs << "x,y,z,yaw,velocity,change_flag,steering_flag,accel_flag,stop_flag,event_flag" << std::endl;
-    for (const auto& el : lane_array.lanes[idx].waypoints)
-    {
-      ofs << std::fixed << std::setprecision(4) << el.pose.pose.position.x << "," << el.pose.pose.position.y << ","
-          << el.pose.pose.position.z << "," << tf::getYaw(el.pose.pose.orientation) << ","
-          << mps2kmph(el.twist.twist.linear.x) << "," << (int)el.change_flag << "," << (int)el.wpstate.steering_state
-          << "," << (int)el.wpstate.accel_state << "," << (int)el.wpstate.stop_state << ","
-          << (int)el.wpstate.event_state << std::endl;
-    }
-    idx++;
+    lane_array->lanes.emplace_back(lane);
   }
 }
 
