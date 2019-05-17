@@ -9,15 +9,15 @@
 # while variables you need to specify have prefix "TENSORFLOW"
 # This module will set the following variables in your project:
 #
-# ``TensorFlow_VERSION``
+# ``TENSORFLOW_VERSION``
 #   exact TensorFlow version obtained from runtime
-# ``TensorFlow_ABI``
+# ``TENSORFLOW_ABI``
 #   ABI specification of TensorFlow library obtained from runtime
-# ``TensorFlow_INCLUDE_DIR``
+# ``TENSORFLOW_INCLUDE_DIRS``
 #   where to find tensorflow header files obtained from runtime
-# ``TensorFlow_LIBRARY``
+# ``TENSORFLOW_LIBS``
 #   the libraries to link against to use TENSORFLOW obtained from runtime
-# ``TensorFlow_FOUND TRUE``
+# ``TENSORFLOW_FOUND TRUE``
 #   If false, do not try to use TENSORFLOW.
 #
 #  for some examples, you will need to specify on of the following paths
@@ -55,9 +55,9 @@ endif(WIN32)
 set(PYTHON_EXECUTABLE "python3" CACHE STRING "specify the python version TensorFlow is installed on.")
 
 
-if(TensorFlow_FOUND)
+if(TENSORFLOW_FOUND)
   # reuse cached variables
-  message(STATUS "Reuse cached information from TensorFlow ${TensorFlow_VERSION} ")
+  message(STATUS "Reuse cached information from TensorFlow ${TENSORFLOW_VERSION} ")
 else()
   message(STATUS "Detecting TensorFlow using ${PYTHON_EXECUTABLE}"
           " (use -DPYTHON_EXECUTABLE=... otherwise)")
@@ -141,30 +141,30 @@ else()
     endif()
 
     # test all given versions
-    set(TensorFlow_FOUND FALSE)
+    set(TENSORFLOW_FOUND FALSE)
     FOREACH(_TensorFlow_VER ${_TensorFlow_TEST_VERSIONS})
       if("${TF_DETECTED_VERSION_MAJOR}.${TF_DETECTED_VERSION_MINOR}" STREQUAL "${_TensorFlow_VER}")
         # found appropriate version
-        set(TensorFlow_VERSION ${TF_DETECTED_VERSION})
-        set(TensorFlow_ABI ${TF_DETECTED_ABI})
-        set(TensorFlow_INCLUDE_DIR ${TF_DETECTED_INCLUDE_DIR})
-        set(TensorFlow_LIBRARY ${TF_DETECTED_LIBRARY})
-        set(TensorFlow_FOUND TRUE)
-        message(STATUS "Found TensorFlow: (found appropriate version \"${TensorFlow_VERSION}\")")
-        message(STATUS "TensorFlow-ABI is ${TensorFlow_ABI}")
-        message(STATUS "TensorFlow-INCLUDE_DIR is ${TensorFlow_INCLUDE_DIR}")
-        message(STATUS "TensorFlow-LIBRARY is ${TensorFlow_LIBRARY}")
+        set(TENSORFLOW_VERSION ${TF_DETECTED_VERSION})
+        set(TENSORFLOW_ABI ${TF_DETECTED_ABI})
+        set(TENSORFLOW_INCLUDE_DIRS ${TF_DETECTED_INCLUDE_DIR})
+        set(TENSORFLOW_LIBS ${TF_DETECTED_LIBRARY})
+        set(TENSORFLOW_FOUND TRUE)
+        message(STATUS "Found TensorFlow: (found appropriate version \"${TENSORFLOW_VERSION}\")")
+        message(STATUS "TensorFlow-ABI is ${TENSORFLOW_ABI}")
+        message(STATUS "TensorFlow-INCLUDE_DIR is ${TENSORFLOW_INCLUDE_DIRS}")
+        message(STATUS "TensorFlow-LIBRARY is ${TENSORFLOW_LIBS}")
 
-        add_definitions("-DTENSORFLOW_ABI=${TensorFlow_ABI}")
-        add_definitions("-DTENSORFLOW_VERSION=${TensorFlow_VERSION}")
+        add_definitions("-DTENSORFLOW_ABI=${TENSORFLOW_ABI}")
+        add_definitions("-DTENSORFLOW_VERSION=${TENSORFLOW_VERSION}")
         break()
       endif()
     ENDFOREACH(_TensorFlow_VER)
 
-    if(NOT TensorFlow_FOUND)
+    if(NOT TENSORFLOW_FOUND)
     message(FATAL_ERROR "Your installed TensorFlow version ${TF_DETECTED_VERSION_MAJOR}.${TF_DETECTED_VERSION_MINOR} is not supported\n"
                         "We tested against ${_TensorFlow_TEST_VERSIONS}")
-    endif(NOT TensorFlow_FOUND)
+    endif(NOT TENSORFLOW_FOUND)
 
     # test 1.11 version
     if("${TF_DETECTED_VERSION}" VERSION_EQUAL "1.11")
@@ -183,7 +183,7 @@ else()
 
 endif()
 
-if(TensorFlow_FOUND)
+if(TENSORFLOW_FOUND)
 
   if(${TF_DISABLE_ASSERTS})
     message(STATUS "[WARNING] The TensorFlow version ${TF_DETECTED_VERSION} has a bug (see \#22766). We disable asserts using -DNDEBUG=True ")
@@ -239,7 +239,7 @@ if(TensorFlow_FOUND)
     add_library(${op_name}_op SHARED kernels/${op_name}_op.cc kernels/${op_name}_kernel.cc ops/${op_name}.cc )
 
     set_target_properties(${op_name}_op PROPERTIES PREFIX "")
-    target_link_libraries(${op_name}_op LINK_PUBLIC ${TensorFlow_LIBRARY})
+    target_link_libraries(${op_name}_op LINK_PUBLIC ${TENSORFLOW_LIBS})
   endmacro()
 
 
@@ -263,36 +263,36 @@ if(TensorFlow_FOUND)
 
     set_target_properties(${op_name}_op PROPERTIES PREFIX "")
     set_target_properties(${op_name}_op PROPERTIES COMPILE_FLAGS "-DGOOGLE_CUDA")
-    target_link_libraries(${op_name}_op LINK_PUBLIC ${op_name}_op_cu ${TensorFlow_LIBRARY})
+    target_link_libraries(${op_name}_op LINK_PUBLIC ${op_name}_op_cu ${TENSORFLOW_LIBS})
   endmacro()
 
   # simplify TensorFlow dependencies
   add_library(TensorFlow_DEP INTERFACE)
   TARGET_INCLUDE_DIRECTORIES(TensorFlow_DEP SYSTEM INTERFACE ${TensorFlow_SOURCE_DIR})
-  TARGET_INCLUDE_DIRECTORIES(TensorFlow_DEP SYSTEM INTERFACE ${TensorFlow_INCLUDE_DIR})
+  TARGET_INCLUDE_DIRECTORIES(TensorFlow_DEP SYSTEM INTERFACE ${TENSORFLOW_INCLUDE_DIRS})
   TARGET_LINK_LIBRARIES(TensorFlow_DEP INTERFACE -Wl,--allow-multiple-definition -Wl,--whole-archive ${TensorFlow_C_LIBRARY} -Wl,--no-whole-archive)
-  TARGET_LINK_LIBRARIES(TensorFlow_DEP INTERFACE -Wl,--allow-multiple-definition -Wl,--whole-archive ${TensorFlow_LIBRARY} -Wl,--no-whole-archive)
+  TARGET_LINK_LIBRARIES(TensorFlow_DEP INTERFACE -Wl,--allow-multiple-definition -Wl,--whole-archive ${TENSORFLOW_LIBS} -Wl,--no-whole-archive)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(
     TENSORFLOW
     FOUND_VAR TENSORFLOW_FOUND
     REQUIRED_VARS
-      TensorFlow_LIBRARY
-      TensorFlow_INCLUDE_DIR
+      TENSORFLOW_LIBS
+      TENSORFLOW_INCLUDE_DIRS
     VERSION_VAR
-      TensorFlow_VERSION
+      TENSORFLOW_VERSION
     )
 
   mark_as_advanced(TF_INFORMATION_STRING TF_DETECTED_VERSION TF_DETECTED_VERSION_MAJOR TF_DETECTED_VERSION_MINOR TF_DETECTED_VERSION TF_DETECTED_ABI
                    TF_DETECTED_INCLUDE_DIR TF_DETECTED_LIBRARY TF_DISABLE_ASSERTS
-                   TensorFlow_C_LIBRARY TensorFlow_LIBRARY TensorFlow_SOURCE_DIR TensorFlow_INCLUDE_DIR TensorFlow_ABI)
+                   TensorFlow_C_LIBRARY TENSORFLOW_LIBS TensorFlow_SOURCE_DIR TENSORFLOW_INCLUDE_DIRS TENSORFLOW_ABI)
 
 endif()
 
-  SET(TensorFlow_INCLUDE_DIR ${TensorFlow_INCLUDE_DIR} CACHE PATH "path to tensorflow header files")
-  SET(TensorFlow_VERSION ${TensorFlow_VERSION} CACHE INTERNAL "The Python executable Version")
-  SET(TensorFlow_ABI ${TensorFlow_ABI} CACHE STRING "The Python executable Version")
-  SET(TensorFlow_LIBRARY ${TensorFlow_LIBRARY} CACHE PATH "The Python executable Version")
-  SET(TensorFlow_FOUND ${TensorFlow_FOUND} CACHE BOOL "The Python executable Version")
+  SET(TENSORFLOW_INCLUDE_DIRS ${TENSORFLOW_INCLUDE_DIRS} CACHE PATH "path to tensorflow header files")
+  SET(TENSORFLOW_VERSION ${TENSORFLOW_VERSION} CACHE INTERNAL "The Python executable Version")
+  SET(TENSORFLOW_ABI ${TENSORFLOW_ABI} CACHE STRING "The Python executable Version")
+  SET(TENSORFLOW_LIBS ${TENSORFLOW_LIBS} CACHE PATH "The Python executable Version")
+  SET(TENSORFLOW_FOUND ${TENSORFLOW_FOUND} CACHE BOOL "The Python executable Version")
   SET(TF_DISABLE_ASSERTS ${TF_DISABLE_ASSERTS} CACHE BOOL "Workarounds")

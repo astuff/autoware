@@ -387,10 +387,9 @@ if (CUDA_FOUND)
 
     ### region_tlr_tensorflow ###
     ####################################################################################################
-    find_package(CuDNN QUIET)
     find_package(TensorFlow QUIET)
 
-    if (CUDNN_FOUND AND TensorFlow_FOUND)
+    if (TENSORFLOW_FOUND)
         catkin_python_setup()
         catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/region_tlr_tensorflow.py
             DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
