@@ -1,5 +1,4 @@
 <launch>
-
     <arg name="use_traffic_light_result" default="false" />
 
     <node pkg="lane_planner" type="lane_stop" name="lane_stop"/>
