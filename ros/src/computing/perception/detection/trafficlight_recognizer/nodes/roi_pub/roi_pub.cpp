@@ -249,8 +249,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
   if (msg->encoding == "bgr8")
     cv::cvtColor(se_frame->image, frame_, cv::COLOR_BGR2RGB);
-  else
+  else if (msg->encoding == "bayer_bggr8")
     cv::cvtColor(se_frame->image, frame_, cv::COLOR_BayerRG2RGB);
+  else
+    ROS_WARN("Received image of unhandled encoding type.");
 
   frame_header_ = msg->header;
 }
