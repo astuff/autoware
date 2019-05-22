@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Arguments -->
+  <arg name="camera_id" default="camera"/>
+  <arg name="nn_model_path" />
+  <arg name="image_transport" default="compressed" />
+  <arg name="image_raw_topic" default="$(arg camera_id)/image_raw "/>
+
+  <!-- ROI extractor -->
+  <node pkg="trafficlight_recognizer" type="roi_pub" name="roi_pub">
+    <param name="image_transport" value="$(arg image_transport)" />
+    <param name="image_raw_topic" value="$(arg image_raw_topic)" />
+  </node>
+  
+  <!-- Classifier -->
+  <node pkg="trafficlight_recognizer" type="region_tlr_tensorflow.py" name="region_tlr_tensorflow">
+    <param name="nn_model_path" value="$(arg nn_model_path)" />
+  </node>
+  
+</launch>

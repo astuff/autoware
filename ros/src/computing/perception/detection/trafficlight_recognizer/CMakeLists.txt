@@ -6,6 +6,8 @@ execute_process(
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 set(ROS_VERSION $ENV{ROS_DISTRO})
 
 
@@ -20,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
         geometry_msgs
         libvectormap
         roscpp
+        rospy
         sensor_msgs
         std_msgs
         tf
@@ -28,6 +31,8 @@ find_package(catkin REQUIRED COMPONENTS
         waypoint_follower
         autoware_msgs
         vector_map
+        camera_info_manager
+        image_transport
         )
 
 find_package(OpenCV REQUIRED)
@@ -74,6 +79,7 @@ catkin_package(
         geometry_msgs
         libvectormap
         roscpp
+        rospy
         sensor_msgs
         std_msgs
         tf
@@ -207,6 +213,21 @@ target_link_libraries(roi_extractor
 add_dependencies(region_tlr
         ${catkin_EXPORTED_TARGETS})
 
+### roi_pub ###
+include_directories(
+        ${catkin_INCLUDE_DIRS}
+        ${OpenCV_INCLUDE_DIRS}
+)
+
+add_executable(roi_pub
+        nodes/roi_pub/roi_pub.cpp
+        )
+
+target_link_libraries(roi_pub
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
+        libcontext
+)
 
 ### label_maker ###
 find_package(Qt5Core REQUIRED)
@@ -254,52 +275,7 @@ target_link_libraries(label_maker
         )
 
 
-### region_tlr_ssd ###
-##############################SSD'sFORK of CAFFE NEEDS TO BE PREVIOUSLY COMPILED####################
-set(SSD_CAFFE_PATH "$ENV{HOME}/ssdcaffe/distribute")
-####################################################################################################
-if (EXISTS "${SSD_CAFFE_PATH}")
-
-    find_package(CUDA REQUIRED)
-
-    add_executable(region_tlr_ssd
-            nodes/region_tlr_ssd/region_tlr_ssd.cpp
-            nodes/region_tlr_ssd/traffic_light_recognizer.cpp
-            )
-
-    target_link_libraries(region_tlr_ssd
-            ${catkin_LIBRARIES}
-            ${OpenCV_LIBS}
-            ${CUDA_LIBRARIES}
-            ${CUDA_CUBLAS_LIBRARIES}
-            ${CUDA_curand_LIBRARY}
-            ${SSD_CAFFE_PATH}/lib/libcaffe.so
-            glog
-            libcontext
-            )
-
-    target_include_directories(region_tlr_ssd PRIVATE
-            ${SSD_CAFFE_PATH}/include
-            ${CUDA_INCLUDE_DIRS}
-            nodes/region_tlr_ssd/
-            )
-
-    add_dependencies(region_tlr_ssd
-            ${catkin_EXPORTED_TARGETS}
-            )
-
-    install(TARGETS region_tlr_ssd
-            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-            )
-
-else ()                          # if(EXISTS "${SSD_CAFFE_PATH}")
-    message("'SSD/Caffe' is not installed. 'region_tlr_ssd' will not be built.")
-endif ()                         # if(EXISTS "${SSD_CAFFE_PATH}")
-
-
-install(TARGETS region_tlr feat_proj tlr_tuner roi_extractor label_maker libcontext tl_switch
+install(TARGETS region_tlr feat_proj tlr_tuner roi_extractor roi_pub label_maker libcontext tl_switch
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -314,53 +290,113 @@ install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
         PATTERN ".svn" EXCLUDE)
 
+find_package(CUDA)
 
-### region_tlr_mxnet ###
-##############################MXNET with CPP_PACKAGE NEEDS TO BE PREVIOUSLY COMPILED################
-#############Please follow README file for instructions#############################################
-set(MXNET_PATH "$ENV{HOME}/mxnet/")
-####################################################################################################
-if (EXISTS "${MXNET_PATH}")
+if (CUDA_FOUND)
 
-    find_package(CUDA REQUIRED)
+    ### region_tlr_ssd ###
+    ##############################SSD'sFORK of CAFFE NEEDS TO BE PREVIOUSLY COMPILED####################
+    set(SSD_CAFFE_PATH "$ENV{HOME}/ssdcaffe/distribute")
+    ####################################################################################################
+    if (EXISTS "${SSD_CAFFE_PATH}")
 
-    add_executable(region_tlr_mxnet
-            nodes/region_tlr_mxnet/region_tlr_mxnet.cpp
-            nodes/region_tlr_mxnet/mxnet_traffic_light_recognizer.cpp
-            nodes/region_tlr_mxnet/region_tlr_mxnet.h
-            nodes/region_tlr_mxnet/mxnet_traffic_light_recognizer.h
-            )
+        add_executable(region_tlr_ssd
+                nodes/region_tlr_ssd/region_tlr_ssd.cpp
+                nodes/region_tlr_ssd/traffic_light_recognizer.cpp
+                )
 
-    target_link_libraries(region_tlr_mxnet
-            ${catkin_LIBRARIES}
-            ${OpenCV_LIBS}
-            ${CUDA_LIBRARIES}
-            ${CUDA_CUBLAS_LIBRARIES}
-            ${CUDA_curand_LIBRARY}
-            ${MXNET_PATH}/lib/libmxnet.so
-            libcontext
-            )
+        target_link_libraries(region_tlr_ssd
+                ${catkin_LIBRARIES}
+                ${OpenCV_LIBS}
+                ${CUDA_LIBRARIES}
+                ${CUDA_CUBLAS_LIBRARIES}
+                ${CUDA_curand_LIBRARY}
+                ${SSD_CAFFE_PATH}/lib/libcaffe.so
+                glog
+                libcontext
+                )
 
-    target_include_directories(region_tlr_mxnet PRIVATE
-            ${MXNET_PATH}/nnvm/include/
-            ${MXNET_PATH}/cpp-package/include/
-            ${MXNET_PATH}/include/
-            ${MXNET_PATH}/dmlc-core/include/
-            ${CUDA_INCLUDE_DIRS}
-            nodes/region_tlr_mxnet/
-            include
-            )
+        target_include_directories(region_tlr_ssd PRIVATE
+                ${SSD_CAFFE_PATH}/include
+                ${CUDA_INCLUDE_DIRS}
+                nodes/region_tlr_ssd/
+                )
 
-    add_dependencies(region_tlr_mxnet
-            ${catkin_EXPORTED_TARGETS}
-            )
+        add_dependencies(region_tlr_ssd
+                ${catkin_EXPORTED_TARGETS}
+                )
 
-    install(TARGETS region_tlr_mxnet
-            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-            )
+        install(TARGETS region_tlr_ssd
+                ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+                )
+
+    else ()                          # if(EXISTS "${SSD_CAFFE_PATH}")
+        message("'SSD/Caffe' is not installed. 'region_tlr_ssd' will not be built.")
+    endif ()                         # if(EXISTS "${SSD_CAFFE_PATH}")
+
+
+    ### region_tlr_mxnet ###
+    ##############################MXNET with CPP_PACKAGE NEEDS TO BE PREVIOUSLY COMPILED################
+    #############Please follow README file for instructions#############################################
+    set(MXNET_PATH "$ENV{HOME}/mxnet/")
+    ####################################################################################################
+    if (EXISTS "${MXNET_PATH}")
+
+        add_executable(region_tlr_mxnet
+                nodes/region_tlr_mxnet/region_tlr_mxnet.cpp
+                nodes/region_tlr_mxnet/mxnet_traffic_light_recognizer.cpp
+                nodes/region_tlr_mxnet/region_tlr_mxnet.h
+                nodes/region_tlr_mxnet/mxnet_traffic_light_recognizer.h
+                )
+
+        target_link_libraries(region_tlr_mxnet
+                ${catkin_LIBRARIES}
+                ${OpenCV_LIBS}
+                ${CUDA_LIBRARIES}
+                ${CUDA_CUBLAS_LIBRARIES}
+                ${CUDA_curand_LIBRARY}
+                ${MXNET_PATH}/lib/libmxnet.so
+                libcontext
+                )
+
+        target_include_directories(region_tlr_mxnet PRIVATE
+                ${MXNET_PATH}/nnvm/include/
+                ${MXNET_PATH}/cpp-package/include/
+                ${MXNET_PATH}/include/
+                ${MXNET_PATH}/dmlc-core/include/
+                ${CUDA_INCLUDE_DIRS}
+                nodes/region_tlr_mxnet/
+                include
+                )
+
+        add_dependencies(region_tlr_mxnet
+                ${catkin_EXPORTED_TARGETS}
+                )
+
+        install(TARGETS region_tlr_mxnet
+                ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+                )
+
+    else ()
+        message("'MXNET Package' is not installed. 'region_tlr_mxnet' will not be built.")
+    endif ()
+
+    ### region_tlr_tensorflow ###
+    ####################################################################################################
+    find_package(TensorFlow QUIET)
+
+    if (TENSORFLOW_FOUND)
+        catkin_python_setup()
+        catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/region_tlr_tensorflow.py
+            DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+    else ()
+        message("'CuDNN' or 'tensorflow' is not installed. 'region_tlr_tensorflow' will not be built.")
+    endif ()
 
 else ()
-    message("'MXNET Package' is not installed. 'region_tlr_mxnet' will not be built.")
+  message("'CUDA' is not installed. 'region_tlr_mxnet', 'region_tlr_ssd', and 'region_tlr_tensorflow' will not be built.")
 endif ()
