@@ -37,7 +37,6 @@
 #include <automotive_platform_msgs/GearFeedback.h>
 #include <automotive_navigation_msgs/ModuleState.h>
 #include <automotive_platform_msgs/SteeringFeedback.h>
-//#include <pacmod_msgs/WheelSpeedRpt.h>
 
 
 #include <autoware_msgs/VehicleCmd.h>
@@ -75,7 +74,6 @@ private:
   message_filters::Subscriber<automotive_platform_msgs::GearFeedback>* gear_feedback_sub_;
   message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>* steering_wheel_sub_;
   message_filters::Synchronizer<SSCFeedbacksSyncPolicy>* ssc_feedbacks_sync_;
-  //message_filters::Subscriber<pacmod_msgs::WheelSpeedRpt>* wheel_speed_sub_;
 
   // publishers
   ros::Publisher steer_mode_pub_;
