@@ -19,7 +19,6 @@
 SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_initialized_(false)
 {
   // setup parameters
-  // private_nh_.param<bool>("use_rear_wheel_speed", use_rear_wheel_speed_, true); #Redudant, being estimated in SSC
   private_nh_.param<bool>("use_adaptive_gear_ratio", use_adaptive_gear_ratio_, true);
   private_nh_.param<int>("command_timeout", command_timeout_, 1000);
   private_nh_.param<double>("loop_rate", loop_rate_, 30.0);
@@ -51,9 +50,6 @@ SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_
       new message_filters::Subscriber<automotive_platform_msgs::GearFeedback>(nh_, "as/gear_feedback", 10);
   velocity_accel_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>(nh_, "as/velocity_accel_cov", 10); 
-  //VelocityAccel message will be deprecated
-  //wheel_speed_sub_ =
-  //    new message_filters::Subscriber<pacmod_msgs::WheelSpeedRpt>(nh_, "pacmod/parsed_tx/wheel_speed_rpt", 10);
   steering_wheel_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>(nh_, "as/steering_feedback", 10);
   ssc_feedbacks_sync_ = new message_filters::Synchronizer<SSCFeedbacksSyncPolicy>(
@@ -115,13 +111,7 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
                                             const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel)
 {
   ros::Time stamp = msg_velocity->header.stamp;
-
-  // current speed - implementated inside SSC for estimating velocityaccelcov message.
-  //double speed =
-  //    !use_rear_wheel_speed_ ?
-  //       (msg_velocity->velocity) :
-  //        (msg_wheel_speed->rear_left_wheel_speed + msg_wheel_speed->rear_right_wheel_speed) * tire_radius_ / 2.;
-
+  
   // update adaptive gear ratio (avoiding zero divizion)
   adaptive_gear_ratio_ =
     std::max(1e-5, agr_coef_a_ + agr_coef_b_ * msg_velocity->velocity * msg_velocity->velocity - agr_coef_c_ * msg_steering_wheel->steering_wheel_angle);
