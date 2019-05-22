@@ -11,6 +11,8 @@
 #include <vector>
 #include <math.h>
 #include <GeographicLib/Geocentric.hpp>
+#include <GeographicLib/UTMUPS.hpp>
+#include <GeographicLib/MGRS.hpp>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -48,6 +50,7 @@ void GpsInsLocalizerNl::loadParams()
     this->pnh.param("publish_earth_gpsm_tf", this->publish_earth_gpsm_tf, false);
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
     this->pnh.param<std::string>("static_gps_frame", this->static_gps_frame, "gps");
+    this->pnh.param("mgrs_mode", this->mgrs_mode, false);
     ROS_INFO("Parameters Loaded");
 }
 
@@ -55,6 +58,33 @@ void GpsInsLocalizerNl::insDataCb(
     const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
+    // MGRS mode is a simplified opertating mode that doesn't use ECEF and simply
+    // localizes in an existing map frame that presumably represents the nearest
+    // MGRS origin
+    if (this->mgrs_mode)
+    {
+        tf2::Transform base_link_map = convertLLHtoMGRS(
+            inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height,
+            inspva_msg->roll * M_PI / 180,
+            inspva_msg->pitch * M_PI / 180,
+            inspva_msg->azimuth * M_PI / 180);
+
+        // Broadcast the map -> base_link transform
+        geometry_msgs::TransformStamped map_baselink_tf;
+        map_baselink_tf.header.frame_id = "map";
+        map_baselink_tf.child_frame_id = "base_link";
+        // map_baselink_tf.header.stamp = inspva_msg->header.stamp;
+        tf2::convert(base_link_map, map_baselink_tf.transform);
+        this->tf_bc.sendTransform(map_baselink_tf);
+
+        // Publish base_link pose in the map frame
+        publishPose(base_link_map, inspva_msg->header.stamp);
+        pubishVelocity(inspva_msg, imu_msg);
+
+        return;
+    }
+
+
     // We don't need any static TFs for these 2 functions, so no need to wait
     // for init
     if (this->create_map_frame)
@@ -101,14 +131,23 @@ void GpsInsLocalizerNl::insDataCb(
     this->tf_bc.sendTransform(map_baselink_tf);
 
     // Publish base_link pose in the map frame
-    geometry_msgs::PoseStamped base_link_map_stamped;
-    base_link_map_stamped.header.stamp = inspva_msg->header.stamp;
-    base_link_map_stamped.header.frame_id = "map";
-    tf2::toMsg(base_link_map, base_link_map_stamped.pose);
-    this->pose_pub.publish(base_link_map_stamped);
-
+    // geometry_msgs::PoseStamped base_link_map_stamped;
+    // base_link_map_stamped.header.stamp = inspva_msg->header.stamp;
+    // base_link_map_stamped.header.frame_id = "map";
+    // tf2::toMsg(base_link_map, base_link_map_stamped.pose);
+    // this->pose_pub.publish(base_link_map_stamped);
+    publishPose(base_link_map, inspva_msg->header.stamp);
     pubishVelocity(inspva_msg, imu_msg);
-    return;
+}
+
+void GpsInsLocalizerNl::publishPose(tf2::Transform pose, ros::Time stamp)
+{
+    // Publish pose in the map frame
+    geometry_msgs::PoseStamped pose_stamped;
+    pose_stamped.header.stamp = stamp;
+    pose_stamped.header.frame_id = "map";
+    tf2::toMsg(pose, pose_stamped.pose);
+    this->pose_pub.publish(pose_stamped);
 }
 
 void GpsInsLocalizerNl::pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
@@ -270,6 +309,31 @@ tf2::Transform GpsInsLocalizerNl::convertLLHtoECEF(double latitude, double longi
 
     tf2::Transform ecef_enu_tf(rotation, origin);
     return ecef_enu_tf;
+}
+
+tf2::Transform GpsInsLocalizerNl::convertLLHtoMGRS(double latitude, double longitude, double height, double roll, double pitch, double yaw)
+{
+    int utm_zone;
+    bool utm_northp;
+    double utm_x, utm_y;
+    std::string mgrs_string;
+    // precision 8 represents millimetres
+    int precision = 8;
+
+    GeographicLib::UTMUPS::Forward(latitude, longitude, utm_zone, utm_northp, utm_x, utm_y);
+    GeographicLib::MGRS::Forward(utm_zone, utm_northp, utm_x, utm_y, latitude, precision, mgrs_string);
+
+    // Parse MGRS string to actually use it
+    tf2::Vector3 mgrs_point;
+    mgrs_point.setX(std::stod(mgrs_string.substr(mgrs_string.length() - precision * 2, precision)) / 1000);
+    mgrs_point.setY(std::stod(mgrs_string.substr(mgrs_string.length() - precision, precision)) / 1000);
+    mgrs_point.setZ(height);
+
+    tf2::Transform mgrs_pose;
+    mgrs_pose.setOrigin(mgrs_point);
+    mgrs_pose.setRotation(convertAzimuthToENU(roll, pitch, yaw));
+
+    return mgrs_pose;
 }
 
 tf2::Quaternion GpsInsLocalizerNl::convertAzimuthToENU(double roll, double pitch, double yaw)

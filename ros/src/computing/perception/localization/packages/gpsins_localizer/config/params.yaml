@@ -16,3 +16,6 @@ measured_gps_frame: gps_measured
 # The frame name of the gps sensor, Novatel SPAN devices report data in the imu
 # frame
 static_gps_frame: imu
+
+# Enable to localize in MGRS coordinates
+mgrs_mode: true
