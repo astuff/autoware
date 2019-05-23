@@ -71,6 +71,17 @@ include_directories(
         ${Eigen3_INCLUDE_DIRS}
 )
 
+add_service_files(
+  DIRECTORY srv
+  FILES RecognizeLightState.srv
+  )
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+  )
+
 catkin_package(
         INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS}
         CATKIN_DEPENDS
@@ -92,17 +103,6 @@ catkin_package(
 
         LIBRARIES libcontext
 )
-
-add_service_files(
-  DIRECTORY srv
-  FILES RecognizeLightState.srv
-  )
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  sensor_msgs
-  )
 
 set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 
