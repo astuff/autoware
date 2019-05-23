@@ -71,6 +71,8 @@ include_directories(
         ${Eigen3_INCLUDE_DIRS}
 )
 
+catkin_python_setup()
+
 add_service_files(
   DIRECTORY srv
   FILES RecognizeLightState.srv
@@ -414,7 +416,6 @@ if (CUDA_FOUND)
                 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
                 )
 
-        catkin_python_setup()
         catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/tensorflow_tlr.py
             DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
     else ()

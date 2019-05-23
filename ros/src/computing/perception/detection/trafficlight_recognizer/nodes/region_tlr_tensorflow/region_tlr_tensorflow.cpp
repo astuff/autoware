@@ -61,7 +61,7 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
     return;
 
   // Acquire signal position on the image
-  Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols, swap_pole_lane_id);
+  Context::SetContexts(contexts_, extracted_pos, frame_.rows, frame_.cols);
 
   // Recognize the color of the traffic light 
   int counter = 0;
@@ -139,9 +139,6 @@ void RegionTLRTensorFlowROSNode::GetROSParam()
 
   private_node_handle.param<double>("score_threshold", score_threshold_, 0.6);
   ROS_INFO("score_threshold: %f", score_threshold_);
-
-  private_node_handle.param<bool>("swap_pole_lane_id", swap_pole_lane_id, "false");
-  ROS_INFO("swap_pole_lane_id: %s", swap_pole_lane_id ? "true" : "false");
 }
 
 void RegionTLRTensorFlowROSNode::StartSubscribersAndPublishers()
