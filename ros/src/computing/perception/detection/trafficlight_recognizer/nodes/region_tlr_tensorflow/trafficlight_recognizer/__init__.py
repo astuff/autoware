@@ -1,1 +1,1 @@
-from region_tlr_tensorflow import *
+from tensorflow_tlr import *
