@@ -42,21 +42,25 @@ def recognize_light_state(req):
     class_id = CLASSIFIER_STATE_MAP[np.argmax(proba)]
     return [class_id, confidence]
 
-rospy.init_node('tensorflow_tlr')
+def run():
+    rospy.init_node('tensorflow_tlr')
+    
+    # Workaround for cuDNN issue
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    session = tf.Session(config=config)
+    
+    # Setup the neural network
+    nn_model_path = rospy.get_param('~nn_model_path')
+    nn_model = load_model(nn_model_path)
+    
+    # Have to do this or the prediction in the callback fails
+    proba = nn_model.predict(np.zeros((1, TARGET_SIZE[0], TARGET_SIZE[1], NUM_CHANNELS)))
+    
+    # Setup service
+    s = rospy.Service('recognize_light_state', RecognizeLightState, recognize_light_state)
+    
+    rospy.spin()
 
-# Workaround for cuDNN issue
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-session = tf.Session(config=config)
-
-# Setup the neural network
-nn_model_path = rospy.get_param('~nn_model_path')
-nn_model = load_model(nn_model_path)
-
-# Have to do this or the prediction in the callback fails
-proba = nn_model.predict(np.zeros((1, TARGET_SIZE[0], TARGET_SIZE[1], NUM_CHANNELS)))
-
-# Setup service
-s = rospy.Service('recognize_light_state', RecognizeLightState, recognize_light_state)
-
-rospy.spin()
+if __name__ == "__main__":
+    run()

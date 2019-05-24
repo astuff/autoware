@@ -74,7 +74,6 @@ include_directories(
 catkin_python_setup()
 
 add_service_files(
-  DIRECTORY srv
   FILES RecognizeLightState.srv
   )
 
