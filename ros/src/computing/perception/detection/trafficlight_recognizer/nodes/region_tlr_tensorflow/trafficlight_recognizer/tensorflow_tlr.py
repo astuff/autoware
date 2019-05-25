@@ -21,7 +21,7 @@ class RegionTlrTensorFlow:
         self.cv_bridge = CvBridge()
 
     def preprocess_image(self, img):
-        if USE_ALT_COLORSPACE:
+        if self.USE_ALT_COLORSPACE:
             out_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
         else:
             out_img = img.copy()
@@ -35,11 +35,11 @@ class RegionTlrTensorFlow:
     
     def recognize_light_state(self, req):
         # Prepare the input image then feed it into the NN for prediction
-        cv_image = cv_bridge.imgmsg_to_cv2(req.roi_image, "passthrough")
-        img = preprocess_image(cv_image)
+        cv_image = self.cv_bridge.imgmsg_to_cv2(req.roi_image, "passthrough")
+        img = self.preprocess_image(cv_image)
     
         # Make the class prediction for this image and get a confidence value
-        proba = nn_model.predict(img)
+        proba = self.nn_model.predict(img)
         confidence = np.amax(proba)
         class_id = self.CLASSIFIER_STATE_MAP[np.argmax(proba)]
         return [class_id, confidence]
