@@ -26,7 +26,7 @@ class RegionTlrTensorFlow:
         else:
             out_img = img.copy()
     
-        out_img = cv2.resize(out_img, TARGET_SIZE, interpolation=cv2.INTER_LINEAR)
+        out_img = cv2.resize(out_img, self.TARGET_SIZE, interpolation=cv2.INTER_LINEAR)
         out_img = out_img.astype("float") / 255.0 # normalize to [0, 1]
         out_img = img_to_array(out_img)
         out_img = np.expand_dims(out_img, axis=0) # add dimension for batch index
@@ -41,7 +41,7 @@ class RegionTlrTensorFlow:
         # Make the class prediction for this image and get a confidence value
         proba = nn_model.predict(img)
         confidence = np.amax(proba)
-        class_id = CLASSIFIER_STATE_MAP[np.argmax(proba)]
+        class_id = self.CLASSIFIER_STATE_MAP[np.argmax(proba)]
         return [class_id, confidence]
 
     def run(self):
@@ -54,10 +54,10 @@ class RegionTlrTensorFlow:
         
         # Setup the neural network
         self.nn_model_path = rospy.get_param('~nn_model_path')
-        self.nn_model = load_model(nn_model_path)
+        self.nn_model = load_model(self.nn_model_path)
         
         # Have to do this or the prediction in the callback fails
-        proba = nn_model.predict(np.zeros((1, TARGET_SIZE[0], TARGET_SIZE[1], NUM_CHANNELS)))
+        proba = self.nn_model.predict(np.zeros((1, self.TARGET_SIZE[0], self.TARGET_SIZE[1], self.NUM_CHANNELS)))
         
         # Setup service
         self.service = rospy.Service('recognize_light_state', RecognizeLightState, self.recognize_light_state)
