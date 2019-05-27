@@ -307,7 +307,7 @@ tf2::Transform GpsInsLocalizerNl::convertECEFtoMGRS(tf2::Transform pose, double 
     // precision 8 represents millimetres
     int precision = 8;
 
-    GeographicLib::UTMUPS::Forward(latitude, longitude, utm_zone, utm_northp, utm_x, utm_y);
+    GeographicLib::UTMUPS::Forward(latitude, longitude, utm_zone, utm_northp, utm_x, utm_y, GeographicLib::UTMUPS::zonespec::STANDARD, true);
     GeographicLib::MGRS::Forward(utm_zone, utm_northp, utm_x, utm_y, latitude, precision, mgrs_string);
 
     // Parse MGRS string to get position
@@ -316,10 +316,25 @@ tf2::Transform GpsInsLocalizerNl::convertECEFtoMGRS(tf2::Transform pose, double 
     mgrs_point.setY(std::stod(mgrs_string.substr(mgrs_string.length() - precision, precision)) / 1000);
     mgrs_point.setZ(height);
 
+    // Check if zone suddenly changed
+    std::string current_mgrs_zone = mgrs_string.substr(0, mgrs_string.length() - precision * 2);
+    if (this->mgrs_zone.empty())
+    {
+        this->mgrs_zone = current_mgrs_zone;
+    }
+    if (this->mgrs_zone != current_mgrs_zone || this->mgrs_pose_frozen)
+    {
+        // MGRS zone changed!
+        ROS_ERROR_THROTTLE(0.5, "MGRS zone has changed! freezing the localizer in the previous zone");
+        this->mgrs_pose_frozen = true;
+        return this->prev_mgrs_pose;
+    }
+
     tf2::Transform mgrs_pose;
     mgrs_pose.setOrigin(mgrs_point);
     mgrs_pose.setRotation(convertAzimuthToENU(roll, pitch, yaw));
 
+    this->prev_mgrs_pose = mgrs_pose;
     return mgrs_pose;
 }
 

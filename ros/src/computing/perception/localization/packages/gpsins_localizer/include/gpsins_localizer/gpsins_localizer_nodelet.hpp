@@ -79,6 +79,9 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     bool initialized = false;
     bool map_frame_established = false;
     bool gps_frame_established = false;
+    std::string mgrs_zone = "";
+    tf2::Transform prev_mgrs_pose;
+    bool mgrs_pose_frozen = false;
 
     // Parameters
     std::string imu_data_topic_name = "gps/imu";
