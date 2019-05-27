@@ -17,5 +17,8 @@ measured_gps_frame: gps_measured
 # frame
 static_gps_frame: imu
 
-# Enable to localize in MGRS coordinates
+# MGRS mode is a simplified opertating mode that doesn't use ECEF and simply
+# localizes in an existing map frame that presumably represents the nearest
+# MGRS origin. The "create_map_frame" and "publish_earth_gpsm_tf" parameters
+# have no effect if mgrs_mode is enabled.
 mgrs_mode: true

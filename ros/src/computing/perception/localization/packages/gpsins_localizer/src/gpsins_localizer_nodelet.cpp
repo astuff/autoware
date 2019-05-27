@@ -58,42 +58,11 @@ void GpsInsLocalizerNl::insDataCb(
     const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
     const sensor_msgs::Imu::ConstPtr& imu_msg)
 {
-    // MGRS mode is a simplified opertating mode that doesn't use ECEF and simply
-    // localizes in an existing map frame that presumably represents the nearest
-    // MGRS origin
-    if (this->mgrs_mode)
-    {
-        tf2::Transform base_link_map = convertLLHtoMGRS(
-            inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height,
-            inspva_msg->roll * M_PI / 180,
-            inspva_msg->pitch * M_PI / 180,
-            inspva_msg->azimuth * M_PI / 180);
-
-        // Broadcast the map -> base_link transform
-        geometry_msgs::TransformStamped map_baselink_tf;
-        map_baselink_tf.header.frame_id = "map";
-        map_baselink_tf.child_frame_id = "base_link";
-        // map_baselink_tf.header.stamp = inspva_msg->header.stamp;
-        tf2::convert(base_link_map, map_baselink_tf.transform);
-        this->tf_bc.sendTransform(map_baselink_tf);
-
-        // Publish base_link pose in the map frame
-        publishPose(base_link_map, inspva_msg->header.stamp);
-        pubishVelocity(inspva_msg, imu_msg);
-
-        return;
-    }
-
-
-    // We don't need any static TFs for these 2 functions, so no need to wait
+    // We don't need any static TFs for this function, so no need to wait
     // for init
-    if (this->create_map_frame)
+    if (this->create_map_frame && !this->mgrs_mode)
     {
         createMapFrame(inspva_msg);
-    }
-    if (this->publish_earth_gpsm_tf)
-    {
-        bcMeasuredGpsFrame(inspva_msg);
     }
 
     // Don't continue if uninitialized
@@ -103,41 +72,37 @@ void GpsInsLocalizerNl::insDataCb(
         return;
     }
 
-    // Get position of measured GPS coordinates in earth frame
-    tf2::Transform gps_point_earth = convertLLHtoECEF(
-        inspva_msg->latitude, inspva_msg->longitude, inspva_msg->height);
-
-    // Get position in map frame
-    tf2::Transform gps_pose_map = earth_map_tf * gps_point_earth;
-
-    // Orientation of the gps in the ENU(map) frame
-    tf2::Quaternion orientation_gps_map = convertAzimuthToENU(
-        inspva_msg->roll * M_PI / 180,
-        inspva_msg->pitch * M_PI / 180,
-        inspva_msg->azimuth * M_PI / 180);
-
-    // Completed Pose of the gps in the map frame
-    gps_pose_map.setRotation(orientation_gps_map);
+    // Get the pose of the base_link in the earth (ECEF) frame
+    tf2::Transform baselink_earth = calculateBaselinkPose(inspva_msg);
 
     // Pose of base_link in the map frame
-    tf2::Transform base_link_map = gps_pose_map * base_link_gps_tf;
+    tf2::Transform baselink_map;
+    if (this->mgrs_mode)
+    {
+        baselink_map = convertECEFtoMGRS(baselink_earth,
+            inspva_msg->roll * M_PI / 180,
+            inspva_msg->pitch * M_PI / 180,
+            inspva_msg->azimuth * M_PI / 180);
+    }
+    else
+    {
+        baselink_map = earth_map_tf * baselink_earth;
+    }
 
-    // Broadcast the map -> base_link transform
+    // publish
+    broadcastTf(baselink_map, inspva_msg->header.stamp);
+    publishPose(baselink_map, inspva_msg->header.stamp);
+    pubishVelocity(inspva_msg, imu_msg);
+}
+
+void GpsInsLocalizerNl::broadcastTf(tf2::Transform transform, ros::Time stamp)
+{
     geometry_msgs::TransformStamped map_baselink_tf;
     map_baselink_tf.header.frame_id = "map";
     map_baselink_tf.child_frame_id = "base_link";
-    map_baselink_tf.header.stamp = inspva_msg->header.stamp;
-    tf2::convert(base_link_map, map_baselink_tf.transform);
+    map_baselink_tf.header.stamp = stamp;
+    tf2::convert(transform, map_baselink_tf.transform);
     this->tf_bc.sendTransform(map_baselink_tf);
-
-    // Publish base_link pose in the map frame
-    // geometry_msgs::PoseStamped base_link_map_stamped;
-    // base_link_map_stamped.header.stamp = inspva_msg->header.stamp;
-    // base_link_map_stamped.header.frame_id = "map";
-    // tf2::toMsg(base_link_map, base_link_map_stamped.pose);
-    // this->pose_pub.publish(base_link_map_stamped);
-    publishPose(base_link_map, inspva_msg->header.stamp);
-    pubishVelocity(inspva_msg, imu_msg);
 }
 
 void GpsInsLocalizerNl::publishPose(tf2::Transform pose, ros::Time stamp)
@@ -189,7 +154,7 @@ void GpsInsLocalizerNl::createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr&
     this->map_frame_established = true;
 }
 
-void GpsInsLocalizerNl::bcMeasuredGpsFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
+tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg)
 {
     // Get ENU TF of measured GPS coordinates
     tf2::Transform earth_gps_enu_tf = convertLLHtoECEF(
@@ -205,16 +170,22 @@ void GpsInsLocalizerNl::bcMeasuredGpsFrame(const novatel_gps_msgs::Inspva::Const
     tf2::Transform tfpose_gpsm(orientation_gpsm);
 
     // Pose of gps in earth frame, with proper orientation
-    tf2::Transform tfpose_earth = earth_gps_enu_tf * tfpose_gpsm;
+    tf2::Transform gpsm_earth = earth_gps_enu_tf * tfpose_gpsm;
 
-    // Convert and broadcast
-    geometry_msgs::TransformStamped output_tf2;
-    output_tf2.header.stamp = inspva_msg->header.stamp;
-    output_tf2.header.frame_id = "earth";
-    output_tf2.child_frame_id = this->measured_gps_frame;
-    tf2::convert(tfpose_earth, output_tf2.transform);
+    // Pose of base_link in earth_frame
+    tf2::Transform baselink_earth = gpsm_earth * this->base_link_gps_tf;
 
-    this->tf_bc.sendTransform(output_tf2);
+    if (this->publish_earth_gpsm_tf && !this->mgrs_mode)
+    {
+        geometry_msgs::TransformStamped earth_gpsm_tf;
+        earth_gpsm_tf.header.stamp = inspva_msg->header.stamp;
+        earth_gpsm_tf.header.frame_id = "earth";
+        earth_gpsm_tf.child_frame_id = this->measured_gps_frame;
+        tf2::convert(gpsm_earth, earth_gpsm_tf.transform);
+        this->tf_bc.sendTransform(earth_gpsm_tf);
+    }
+
+    return baselink_earth;
 }
 
 void GpsInsLocalizerNl::checkInitialize(std::string ins_status)
@@ -311,8 +282,15 @@ tf2::Transform GpsInsLocalizerNl::convertLLHtoECEF(double latitude, double longi
     return ecef_enu_tf;
 }
 
-tf2::Transform GpsInsLocalizerNl::convertLLHtoMGRS(double latitude, double longitude, double height, double roll, double pitch, double yaw)
+tf2::Transform GpsInsLocalizerNl::convertECEFtoMGRS(tf2::Transform pose, double roll, double pitch, double yaw)
 {
+    GeographicLib::Geocentric earth = GeographicLib::Geocentric::WGS84();
+
+    // Convert ECEF to LLA
+    double latitude, longitude, height;
+    earth.Reverse(pose.getOrigin()[0], pose.getOrigin()[1], pose.getOrigin()[2], latitude, longitude, height);
+
+    // Convert LLA to UTM, then to MGRS
     int utm_zone;
     bool utm_northp;
     double utm_x, utm_y;
@@ -323,7 +301,7 @@ tf2::Transform GpsInsLocalizerNl::convertLLHtoMGRS(double latitude, double longi
     GeographicLib::UTMUPS::Forward(latitude, longitude, utm_zone, utm_northp, utm_x, utm_y);
     GeographicLib::MGRS::Forward(utm_zone, utm_northp, utm_x, utm_y, latitude, precision, mgrs_string);
 
-    // Parse MGRS string to actually use it
+    // Parse MGRS string to get position
     tf2::Vector3 mgrs_point;
     mgrs_point.setX(std::stod(mgrs_string.substr(mgrs_string.length() - precision * 2, precision)) / 1000);
     mgrs_point.setY(std::stod(mgrs_string.substr(mgrs_string.length() - precision, precision)) / 1000);

@@ -2,4 +2,9 @@
     <node pkg="gpsins_localizer" type="gpsins_localizer_node" name="gpsins_localizer" output="screen">
         <rosparam command="load" file="$(find gpsins_localizer)/config/params.yaml" />
     </node>
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="earth_to_map" args="
+        -1.2 1.4 0.5
+        0 0 0
+        base_link imu" />
 </launch>
