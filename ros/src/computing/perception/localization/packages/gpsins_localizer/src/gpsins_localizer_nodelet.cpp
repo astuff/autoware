@@ -51,6 +51,15 @@ void GpsInsLocalizerNl::loadParams()
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
     this->pnh.param<std::string>("static_gps_frame", this->static_gps_frame, "gps");
     this->pnh.param("mgrs_mode", this->mgrs_mode, false);
+
+    // Simplified MGRS mode
+    if (this->mgrs_mode)
+    {
+        this->create_map_frame = false;
+        this->publish_earth_gpsm_tf = false;
+        this->map_frame_established = true;
+    }
+
     ROS_INFO("Parameters Loaded");
 }
 
@@ -60,7 +69,7 @@ void GpsInsLocalizerNl::insDataCb(
 {
     // We don't need any static TFs for this function, so no need to wait
     // for init
-    if (this->create_map_frame && !this->mgrs_mode)
+    if (this->create_map_frame)
     {
         createMapFrame(inspva_msg);
     }
@@ -175,7 +184,7 @@ tf2::Transform GpsInsLocalizerNl::calculateBaselinkPose(const novatel_gps_msgs::
     // Pose of base_link in earth_frame
     tf2::Transform baselink_earth = gpsm_earth * this->base_link_gps_tf;
 
-    if (this->publish_earth_gpsm_tf && !this->mgrs_mode)
+    if (this->publish_earth_gpsm_tf)
     {
         geometry_msgs::TransformStamped earth_gpsm_tf;
         earth_gpsm_tf.header.stamp = inspva_msg->header.stamp;

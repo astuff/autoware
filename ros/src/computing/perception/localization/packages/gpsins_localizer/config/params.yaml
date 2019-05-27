@@ -21,4 +21,4 @@ static_gps_frame: imu
 # localizes in an existing map frame that presumably represents the nearest
 # MGRS origin. The "create_map_frame" and "publish_earth_gpsm_tf" parameters
 # have no effect if mgrs_mode is enabled.
-mgrs_mode: true
+mgrs_mode: false
