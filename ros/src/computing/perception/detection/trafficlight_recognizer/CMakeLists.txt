@@ -33,6 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
         vector_map
         camera_info_manager
         image_transport
+        message_generation
         )
 
 find_package(OpenCV REQUIRED)
@@ -70,6 +71,18 @@ include_directories(
         ${Eigen3_INCLUDE_DIRS}
 )
 
+catkin_python_setup()
+
+add_service_files(
+  FILES RecognizeLightState.srv
+  )
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+  )
+
 catkin_package(
         INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS}
         CATKIN_DEPENDS
@@ -87,6 +100,7 @@ catkin_package(
         vector_map_server
         visualization_msgs
         waypoint_follower
+        message_runtime
 
         LIBRARIES libcontext
 )
@@ -213,22 +227,6 @@ target_link_libraries(roi_extractor
 add_dependencies(region_tlr
         ${catkin_EXPORTED_TARGETS})
 
-### roi_pub ###
-include_directories(
-        ${catkin_INCLUDE_DIRS}
-        ${OpenCV_INCLUDE_DIRS}
-)
-
-add_executable(roi_pub
-        nodes/roi_pub/roi_pub.cpp
-        )
-
-target_link_libraries(roi_pub
-        ${catkin_LIBRARIES}
-        ${OpenCV_LIBS}
-        libcontext
-)
-
 ### label_maker ###
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
@@ -275,7 +273,7 @@ target_link_libraries(label_maker
         )
 
 
-install(TARGETS region_tlr feat_proj tlr_tuner roi_extractor roi_pub label_maker libcontext tl_switch
+install(TARGETS region_tlr feat_proj tlr_tuner roi_extractor label_maker libcontext tl_switch
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -390,8 +388,34 @@ if (CUDA_FOUND)
     find_package(TensorFlow QUIET)
 
     if (TENSORFLOW_FOUND)
-        catkin_python_setup()
-        catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/region_tlr_tensorflow.py
+        add_executable(region_tlr_tensorflow
+                nodes/region_tlr_tensorflow/region_tlr_tensorflow.cpp
+                nodes/region_tlr_tensorflow/region_tlr_tensorflow.h
+                )
+
+        target_include_directories(region_tlr_tensorflow PRIVATE
+                ${catkin_INCLUDE_DIRS}
+                ${OpenCV_LIBRARIES}
+                )
+
+        target_link_libraries(region_tlr_tensorflow
+                ${catkin_LIBRARIES}
+                ${OpenCV_LIBRARIES}
+                libcontext
+                )
+
+        add_dependencies(region_tlr_tensorflow
+                ${catkin_EXPORTED_TARGETS}
+                ${trafficlight_recognizer_EXPORTED_TARGETS}
+                )
+
+        install(TARGETS region_tlr_tensorflow
+                ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+                )
+
+        catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/tensorflow_tlr.py
             DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
     else ()
         message("'CuDNN' or 'tensorflow' is not installed. 'region_tlr_tensorflow' will not be built.")
