@@ -276,7 +276,7 @@ void SSCInterface::publishCommand()
   // publish
   speed_mode_pub_.publish(speed_mode);
   steer_mode_pub_.publish(steer_mode);
-  turn_signal_pub_.publish(turn_signal);
+  // turn_signal_pub_.publish(turn_signal);
   gear_pub_.publish(gear_cmd);
 
   ROS_INFO_STREAM("Mode: " << (int)desired_mode << ", "
