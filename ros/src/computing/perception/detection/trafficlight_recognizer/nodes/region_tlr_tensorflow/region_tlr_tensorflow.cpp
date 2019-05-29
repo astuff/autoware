@@ -72,6 +72,33 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
 
     counter++;
 
+    // Hack to fix ROI for a particular traffic light (right-most when crossing W. M. Kumpf Blvd.)
+		// Signal IDs: 176, 185, 158, 186, 177, 157, 175, 168, 184, 167, 159, 166
+    if (   context.signalID == 176 || context.signalID == 185
+				|| context.signalID == 158 || context.signalID == 186
+				|| context.signalID == 177 || context.signalID == 157
+				|| context.signalID == 175 || context.signalID == 168
+				|| context.signalID == 184 || context.signalID == 167
+				|| context.signalID == 159 || context.signalID == 166
+				)
+		{
+			int new_x = context.topLeft.x + -50;
+			int new_y = context.botRight.y + 50;
+			
+			if (new_x < 0)
+				new_x = 0;
+			else if (new_x >= frame_.cols)
+				new_x = frame_.cols;
+
+			if (new_y < 0)
+				new_y = 0;
+			else if (new_y >= frame_.rows)
+				new_y = frame_.rows;
+
+			context.topLeft.x = new_x;
+			context.botRight.y = new_y;
+		}
+
     // Extract ROI
     cv::Mat roi = frame_(cv::Rect(context.topLeft, context.botRight)).clone();
     cv_bridge::CvImage converter;
