@@ -85,6 +85,14 @@ install(DIRECTORY include/${PROJECT_NAME}/
         PATTERN ".svn" EXCLUDE
         )
 
+install(DIRECTORY launch/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+        PATTERN ".svn" EXCLUDE
+        )
+install(FILES autoware_state_drive.yaml autoware_state_mission.yaml autoware_state_vehicle.yaml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        )
+
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(test-decision_maker
