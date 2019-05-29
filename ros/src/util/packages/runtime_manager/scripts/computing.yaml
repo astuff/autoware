@@ -294,6 +294,18 @@ subs :
             border : 16
             flags : [ all ]
 
+      - name : region_tlr_tensorflow
+        desc : region_tlr desc sample
+        cmd  : roslaunch trafficlight_recognizer traffic_light_recognition_tensorflow.launch
+        param: region_tlr_tensorflow
+        gui  :
+          flags : [ need_camera_info ]
+          sel_cam_dialog_only : [ camera_id ]
+          sel_cam_dialog_allow: [ camera_id ]
+          camera_id :
+            border : 16
+            flags : [ all ]
+
       - name : region_tlr_mxnet
         desc : region_tlr_mxnet desc sample
         cmd  : roslaunch trafficlight_recognizer traffic_light_recognition_mxnet.launch
@@ -2302,6 +2314,36 @@ params :
         dash         : ''
         delim        : ':='
         only_enable  : True
+
+  - name : region_tlr_tensorflow
+    topic: /config/superimpose
+    msg  : Bool
+    vars :
+    - name  : data
+      desc  : data desc sample
+      label : Display superimpose result
+      kind  : checkbox
+      v     : False
+    - name         : camera_id
+      desc         : camera_id desc sample
+      kind         : menu
+      label        : Camera ID
+      choices_type : str
+      v            : ''
+      cmd_param    :
+        dash         : ''
+        delim        : ':='
+        only_enable  : True
+    - name      : nn_model_path
+      desc      : network model file
+      label     : nn_model_path
+      kind      : path
+      path_type : multi
+      v         : /home/dev/config/model-RGB-009-0.9857.hdf5
+      cmd_param :
+        dash        : ''
+        delim       : ':='
+
 
   - name : region_tlr_mxnet
     topic: /config/superimpose
