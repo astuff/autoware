@@ -316,3 +316,4 @@ void DecisionMakerNode::callbackFromObstacleWaypoint(const std_msgs::Int32& msg)
   current_status_.obstacle_waypoint = msg.data;
 }
 }
+

@@ -23,6 +23,7 @@
 #include <std_msgs/Int32.h>
 
 #include "autoware_config_msgs/ConfigVelocitySet.h"
+#include "autoware_msgs/DetectedObjectArray.h"
 
 #include <autoware_health_checker/node_status_publisher.h>
 #include <memory>
@@ -48,9 +49,12 @@ class VelocitySetInfo
   double remove_points_upto_;
 
   pcl::PointCloud<pcl::PointXYZ> points_;
+  pcl::PointCloud<pcl::PointXYZ> obstacle_sim_points_;
+  autoware_msgs::DetectedObjectArray objects_;
   geometry_msgs::PoseStamped localizer_pose_;  // pose of sensor
   geometry_msgs::PoseStamped control_pose_;    // pose of base_link
   bool set_pose_;
+  bool use_obstacle_sim_;
 
   std::shared_ptr<autoware_health_checker::NodeStatusPublisher> node_status_publisher_ptr_;
 
@@ -63,6 +67,8 @@ class VelocitySetInfo
   void pointsCallback(const sensor_msgs::PointCloud2ConstPtr &msg);
   void controlPoseCallback(const geometry_msgs::PoseStampedConstPtr &msg);
   void localizerPoseCallback(const geometry_msgs::PoseStampedConstPtr &msg);
+  void obstacleSimCallback(const sensor_msgs::PointCloud2ConstPtr &msg);
+  void objectsCallback(const autoware_msgs::DetectedObjectArray &msg);
   void detectionCallback(const std_msgs::Int32 &msg);
 
   void clearPoints();
@@ -133,6 +139,11 @@ class VelocitySetInfo
     return points_;
   }
 
+  autoware_msgs::DetectedObjectArray getObjects() const
+  {
+    return objects_;
+  }
+
   geometry_msgs::PoseStamped getControlPose() const
   {
     return control_pose_;
@@ -150,3 +161,4 @@ class VelocitySetInfo
 };
 
 #endif // VELOCITY_SET_INFO_H
+
