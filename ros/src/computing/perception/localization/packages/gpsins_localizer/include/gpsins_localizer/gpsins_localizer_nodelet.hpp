@@ -90,6 +90,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     bool publish_earth_gpsm_tf = false;
     std::string measured_gps_frame = "gps_measured";
     std::string static_gps_frame = "gps";
+    bool no_solution_init = false;
     bool mgrs_mode = false;
 };
 

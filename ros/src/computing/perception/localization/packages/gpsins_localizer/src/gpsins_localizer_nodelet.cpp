@@ -50,6 +50,7 @@ void GpsInsLocalizerNl::loadParams()
     this->pnh.param("publish_earth_gpsm_tf", this->publish_earth_gpsm_tf, false);
     this->pnh.param<std::string>("measured_gps_frame", this->measured_gps_frame, "gps_measured");
     this->pnh.param<std::string>("static_gps_frame", this->static_gps_frame, "gps");
+    this->pnh.param("no_solution_init", this->no_solution_init, false);
     this->pnh.param("mgrs_mode", this->mgrs_mode, false);
 
     // Simplified MGRS mode
@@ -245,14 +246,34 @@ void GpsInsLocalizerNl::checkInitialize(std::string ins_status)
     // Then check if we can initialize
     if (this->map_frame_established && this->gps_frame_established)
     {
+        bool ins_alignment_complete = false;
+        bool ins_solution_good = false;
+        if (ins_status == "INS_ALIGNMENT_COMPLETE")
+        {
+            ins_alignment_complete = true;
+        }
         if (ins_status == "INS_SOLUTION_GOOD")
+        {
+            ins_alignment_complete = true;
+            ins_solution_good = true;
+        }
+        if (this->no_solution_init)
+        {
+            ins_solution_good = true;
+        }
+
+        if (ins_alignment_complete && ins_solution_good)
         {
             this->initialized = true;
             ROS_INFO("Localizer initialized");
         }
+        else if (!ins_solution_good)
+        {
+            ROS_WARN_THROTTLE(2, "Waiting for INS_SOLUTION_GOOD status");
+        }
         else
         {
-            ROS_WARN_THROTTLE(2, "Waiting for good INS solution");
+            ROS_WARN_THROTTLE(2, "Waiting for INS_ALIGNMENT_COMPLETE status");
         }
     }
 
