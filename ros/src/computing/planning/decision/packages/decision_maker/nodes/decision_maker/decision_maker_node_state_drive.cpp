@@ -390,4 +390,3 @@ void DecisionMakerNode::exitDriveEmergencyState(cstring_t& state_name, int statu
 }
 
 }
-
