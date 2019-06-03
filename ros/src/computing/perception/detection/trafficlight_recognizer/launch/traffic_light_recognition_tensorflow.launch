@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="no" ?>
+<launch>
+    <!-- <arg name="nn_model_path" default="/tmp/tensorflow-network.params" /> -->
+    <arg name="nn_model_path" default="$(find aw_platform)/model.h5" />
+    <arg name="image_transport" default="compressed" />
+
+    <node pkg="trafficlight_recognizer" type="roi_pub" name="roi_pub">
+        <param name="image_transport" value="$(arg image_transport)" />
+    </node>
+    <node pkg="trafficlight_recognizer" type="region_tlr_tensorflow.py" name="region_tlr_tensorflow">
+        <param name="nn_model_path" value="$(arg nn_model_path)" />
+    </node>
+
+
+
+</launch>

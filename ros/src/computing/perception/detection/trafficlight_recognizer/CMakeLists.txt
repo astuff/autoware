@@ -391,7 +391,7 @@ if (CUDA_FOUND)
 
     if (TENSORFLOW_FOUND)
         catkin_python_setup()
-        catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/trafficlight_recognizer/region_tlr_tensorflow.py
+        catkin_install_python(PROGRAMS nodes/region_tlr_tensorflow/region_tlr_tensorflow.py
             DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
     else ()
         message("'CuDNN' or 'tensorflow' is not installed. 'region_tlr_tensorflow' will not be built.")
