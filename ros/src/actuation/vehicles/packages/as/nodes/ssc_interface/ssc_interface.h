@@ -30,14 +30,14 @@
 #include <automotive_platform_msgs/SpeedMode.h>
 #include <automotive_platform_msgs/GearCommand.h>
 #include <automotive_platform_msgs/TurnSignalCommand.h>
-#include <automotive_platform_msgs/VelocityAccel.h>
+#include <automotive_platform_msgs/VelocityAccelCov.h>
 #include <automotive_platform_msgs/CurvatureFeedback.h>
 #include <automotive_platform_msgs/ThrottleFeedback.h>
 #include <automotive_platform_msgs/BrakeFeedback.h>
 #include <automotive_platform_msgs/GearFeedback.h>
 #include <automotive_navigation_msgs/ModuleState.h>
-#include <pacmod_msgs/WheelSpeedRpt.h>
-#include <pacmod_msgs/SystemRptFloat.h>
+#include <automotive_platform_msgs/SteeringFeedback.h>
+
 
 #include <autoware_msgs/VehicleCmd.h>
 #include <autoware_msgs/VehicleStatus.h>
@@ -54,9 +54,9 @@ public:
 
 private:
   typedef message_filters::sync_policies::ApproximateTime<
-      automotive_platform_msgs::VelocityAccel, automotive_platform_msgs::CurvatureFeedback,
+      automotive_platform_msgs::VelocityAccelCov, automotive_platform_msgs::CurvatureFeedback,
       automotive_platform_msgs::ThrottleFeedback, automotive_platform_msgs::BrakeFeedback,
-      automotive_platform_msgs::GearFeedback, pacmod_msgs::WheelSpeedRpt, pacmod_msgs::SystemRptFloat>
+      automotive_platform_msgs::GearFeedback, automotive_platform_msgs::SteeringFeedback>
       SSCFeedbacksSyncPolicy;
 
   // handle
@@ -67,13 +67,12 @@ private:
   ros::Subscriber vehicle_cmd_sub_;
   ros::Subscriber engage_sub_;
   ros::Subscriber module_states_sub_;
-  message_filters::Subscriber<automotive_platform_msgs::VelocityAccel>* velocity_accel_sub_;
+  message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>* velocity_accel_sub_;
   message_filters::Subscriber<automotive_platform_msgs::CurvatureFeedback>* curvature_feedback_sub_;
   message_filters::Subscriber<automotive_platform_msgs::ThrottleFeedback>* throttle_feedback_sub_;
   message_filters::Subscriber<automotive_platform_msgs::BrakeFeedback>* brake_feedback_sub_;
   message_filters::Subscriber<automotive_platform_msgs::GearFeedback>* gear_feedback_sub_;
-  message_filters::Subscriber<pacmod_msgs::WheelSpeedRpt>* wheel_speed_sub_;
-  message_filters::Subscriber<pacmod_msgs::SystemRptFloat>* steering_wheel_sub_;
+  message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>* steering_wheel_sub_;
   message_filters::Synchronizer<SSCFeedbacksSyncPolicy>* ssc_feedbacks_sync_;
 
   // publishers
@@ -92,7 +91,7 @@ private:
   double deceleration_limit_;  // [m/s^2]
   double max_curvature_rate_;  // [rad/m/s]
 
-  bool use_rear_wheel_speed_;     // instead of 'as/velocity_accel'
+  //bool use_rear_wheel_speed_;     // instead of 'as/velocity_accel'
   bool use_adaptive_gear_ratio_;  // for more accurate steering angle (gr = theta_sw / theta_s)
   double tire_radius_;            // [m] (NOTE: used by 'use_rear_wheel_speed' mode)
   double ssc_gear_ratio_;         // gr = const (NOTE: used by 'use_adaptive_gear_ratio' mode)
@@ -118,13 +117,12 @@ private:
   void callbackFromVehicleCmd(const autoware_msgs::VehicleCmdConstPtr& msg);
   void callbackFromEngage(const std_msgs::BoolConstPtr& msg);
   void callbackFromSSCModuleStates(const automotive_navigation_msgs::ModuleStateConstPtr& msg);
-  void callbackFromSSCFeedbacks(const automotive_platform_msgs::VelocityAccelConstPtr& msg_velocity,
+  void callbackFromSSCFeedbacks(const automotive_platform_msgs::VelocityAccelCovConstPtr& msg_velocity,
                                 const automotive_platform_msgs::CurvatureFeedbackConstPtr& msg_curvature,
                                 const automotive_platform_msgs::ThrottleFeedbackConstPtr& msg_throttle,
                                 const automotive_platform_msgs::BrakeFeedbackConstPtr& msg_brake,
                                 const automotive_platform_msgs::GearFeedbackConstPtr& msg_gear,
-                                const pacmod_msgs::WheelSpeedRptConstPtr& msg_wheel_speed,
-                                const pacmod_msgs::SystemRptFloatConstPtr& msg_steering_wheel);
+                                const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel);
   // functions
   void publishCommand();
 };
