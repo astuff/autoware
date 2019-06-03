@@ -41,7 +41,7 @@ private:
   ros::NodeHandle private_nh_;
 
   // max prediction score
-  const double MAX_PREDICTION_SCORE_;
+  double MAX_PREDICTION_SCORE_;
 
   // ros publisher
   ros::Publisher predicted_objects_pub_;
