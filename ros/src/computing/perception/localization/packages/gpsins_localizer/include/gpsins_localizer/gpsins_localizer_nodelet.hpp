@@ -44,13 +44,16 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
         const sensor_msgs::Imu::ConstPtr& imu_msg);
 
     // Util functions
+    void broadcastTf(tf2::Transform transform, ros::Time stamp);
+    void publishPose(tf2::Transform pose, ros::Time stamp);
     void pubishVelocity(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg,
         const sensor_msgs::Imu::ConstPtr& imu_msg);
     void createMapFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
-    void bcMeasuredGpsFrame(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
+    tf2::Transform calculateBaselinkPose(const novatel_gps_msgs::Inspva::ConstPtr& inspva_msg);
     void checkInitialize(std::string ins_status);
     tf2::Transform convertLLHtoECEF(double latitude, double longitude, double height);
     tf2::Quaternion convertAzimuthToENU(double roll, double pitch, double yaw);
+    tf2::Transform convertECEFtoMGRS(tf2::Transform pose, double roll, double pitch, double yaw);
 
     // Nodehandles, both public and private
     ros::NodeHandle nh, pnh;
@@ -76,6 +79,9 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     bool initialized = false;
     bool map_frame_established = false;
     bool gps_frame_established = false;
+    std::string mgrs_zone = "";
+    tf2::Transform prev_mgrs_pose;
+    bool mgrs_pose_frozen = false;
 
     // Parameters
     std::string imu_data_topic_name = "gps/imu";
@@ -85,6 +91,7 @@ class GpsInsLocalizerNl : public nodelet::Nodelet {
     std::string measured_gps_frame = "gps_measured";
     std::string static_gps_frame = "gps";
     bool no_solution_init = false;
+    bool mgrs_mode = false;
 };
 
 }  // namespace gpsins_localizer
