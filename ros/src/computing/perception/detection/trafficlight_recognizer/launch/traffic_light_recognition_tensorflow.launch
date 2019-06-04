@@ -6,11 +6,13 @@
   <arg name="nn_model_path" default="$(find aw_platform)/config/model-RGB-009-0.9857.hdf5" />
   <arg name="image_transport" default="compressed" />
   <arg name="image_raw_topic" default="$(arg camera_id)/image_raw "/>
+  <arg name="use_converted_map" default="false" />
 
   <!-- ROI extractor -->
   <node pkg="trafficlight_recognizer" type="region_tlr_tensorflow" name="region_tlr_tensorflow">
     <param name="image_transport" value="$(arg image_transport)" />
     <param name="image_raw_topic" value="$(arg image_raw_topic)" />
+    <param name="swap_pole_lane_id" value="$(arg use_converted_map)" />
   </node>
   
   <!-- Classifier -->
