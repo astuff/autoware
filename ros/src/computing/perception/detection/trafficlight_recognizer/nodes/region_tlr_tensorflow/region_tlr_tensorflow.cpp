@@ -67,10 +67,85 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
   int counter = 0;
   for (Context &context: contexts_)
   {
-    if (context.topLeft.x > context.botRight.x)
-      continue;
+    if ( context.topLeft.x > context.botRight.x
+      || context.closestLaneId == -1 )
 
     counter++;
+
+    // Hack to fix ROI for a particular traffic light (right-most when crossing W. M. Kumpf Blvd.)
+    // Signal IDs: 176, 185, 158, 186, 177, 157, 175, 168, 184, 167, 159, 166
+    std::vector<int> signal_ids_to_shift_1 = {176, 185, 158, 186, 177, 157, 175, 168, 184, 167, 159, 166};
+
+    // Hack to fix ROI for a particular set of traffic lights (end of loop)
+    // Signal IDs: 29, 20, 81, 19, 38, 21, 30, 28, 80, 39, 37, 82 (leftmost light)
+    // Signal IDs: 32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33 (middle light)
+    // Signal IDs: 34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88 (rightmost light)
+    // Signal IDs: 66, 69, 72, 75, 78 (parts of all three, cannot see on map)
+    std::vector<int> signal_ids_to_shift_2 = {29, 20, 81, 19, 38, 21, 30, 28, 80, 39, 37, 82,
+                                              32, 41, 84, 23, 22, 83, 40, 42, 31, 24, 85, 33,
+                                              34, 44, 43, 25, 86, 26, 35, 45, 87, 27, 36, 88,
+                                              66, 69, 72, 75, 78};
+
+    if (std::find(signal_ids_to_shift_1.begin(), signal_ids_to_shift_1.end(), context.signalID) != signal_ids_to_shift_1.end())
+    {
+      int new_tl_x = context.topLeft.x + -25;
+      int new_br_x = context.botRight.x + -25;
+      int new_tl_y = context.topLeft.y + 10;
+      int new_br_y = context.botRight.y + 10;
+
+      if (new_tl_x < 0)
+        new_tl_x = 0;
+      else if (new_tl_x >= frame_.cols)
+        new_tl_x = frame_.cols - 1;
+
+      if (new_br_x < 0)
+        new_br_x = 0;
+      else if (new_br_x >= frame_.cols)
+        new_br_x = frame_.cols - 1;
+
+      if (new_tl_y < 0)
+        new_tl_y = 0;
+      else if (new_tl_y >= frame_.rows)
+        new_tl_y = frame_.rows - 1;
+
+      if (new_br_y < 0)
+        new_br_y = 0;
+      else if (new_br_y >= frame_.rows)
+        new_br_y = frame_.rows - 1;
+
+      context.topLeft = cv::Point(new_tl_x, new_tl_y);
+      context.botRight = cv::Point(new_br_x, new_br_y);
+    }
+    else if (std::find(signal_ids_to_shift_2.begin(), signal_ids_to_shift_2.end(), context.signalID) != signal_ids_to_shift_2.end())
+    {
+      int new_tl_x = context.topLeft.x + -20;
+      int new_br_x = context.botRight.x + -20;
+      int new_tl_y = context.topLeft.y + 20;
+      int new_br_y = context.botRight.y + 20;
+
+      if (new_tl_x < 0)
+        new_tl_x = 0;
+      else if (new_tl_x >= frame_.cols)
+        new_tl_x = frame_.cols - 1;
+
+      if (new_br_x < 0)
+        new_br_x = 0;
+      else if (new_br_x >= frame_.cols)
+        new_br_x = frame_.cols - 1;
+
+      if (new_tl_y < 0)
+        new_tl_y = 0;
+      else if (new_tl_y >= frame_.rows)
+        new_tl_y = frame_.rows - 1;
+
+      if (new_br_y < 0)
+        new_br_y = 0;
+      else if (new_br_y >= frame_.rows)
+        new_br_y = frame_.rows - 1;
+
+      context.topLeft = cv::Point(new_tl_x, new_tl_y);
+      context.botRight = cv::Point(new_br_x, new_br_y);
+    }
 
     // Extract ROI
     cv::Mat roi = frame_(cv::Rect(context.topLeft, context.botRight)).clone();
@@ -95,7 +170,6 @@ void RegionTLRTensorFlowROSNode::ROISignalCallback(const autoware_msgs::Signals:
     double confidence = 0.0;
     if (srv_client.call(srv))
     {
-      ROS_INFO("light state: %d (%f)", srv.response.class_id, srv.response.confidence);
       current_state = (LightState)srv.response.class_id;
       confidence = srv.response.confidence;
     }
@@ -139,6 +213,9 @@ void RegionTLRTensorFlowROSNode::GetROSParam()
 
   private_node_handle.param<double>("score_threshold", score_threshold_, 0.6);
   ROS_INFO("score_threshold: %f", score_threshold_);
+
+  private_node_handle.param<bool>("swap_pole_lane_id", swap_pole_lane_id, "false");
+  ROS_INFO("swap_pole_lane_id: %s", swap_pole_lane_id ? "true" : "false");
 }
 
 void RegionTLRTensorFlowROSNode::StartSubscribersAndPublishers()
@@ -427,9 +504,16 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
   int font_baseline = 0;
   CvScalar label_color;
 
-  int counter = 0;
+  std::vector<int> already_drawn;
   for (const auto ctx: contexts)
   {
+    //ROS_INFO("***%d", ctx.closestLaneId);
+    if (std::find(already_drawn.begin(), already_drawn.end(), ctx.closestLaneId) != already_drawn.end()
+      || ctx.closestLaneId == -1)
+      continue;
+
+    already_drawn.push_back(ctx.closestLaneId);
+
     // Draw superimpose result on image
 
     // circle(result_image, ctx.redCenter, ctx.lampRadius, CV_RGB(255, 0, 0), 1, 0);
@@ -469,6 +553,7 @@ void RegionTLRTensorFlowROSNode::PublishImage(std::vector<Context> contexts)
 
     // Add lane ID text
     label += " " + std::to_string(ctx.closestLaneId);
+    label += " " + std::to_string(ctx.lightState);
     cv::Point label_origin = cv::Point(ctx.topLeft.x, ctx.botRight.y + font_baseline);
     cv::putText(result_image, label, label_origin, kFontFace, kFontScale, label_color, kThickness);
   }
