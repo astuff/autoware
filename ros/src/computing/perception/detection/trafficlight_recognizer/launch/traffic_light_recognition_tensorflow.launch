@@ -14,10 +14,10 @@
     <param name="image_raw_topic" value="$(arg image_raw_topic)" />
     <param name="swap_pole_lane_id" value="$(arg use_converted_map)" />
   </node>
-  
+
   <!-- Classifier -->
   <node pkg="trafficlight_recognizer" type="tensorflow_tlr.py" name="tensorflow_tlr">
     <param name="nn_model_path" value="$(arg nn_model_path)" />
   </node>
-  
+
 </launch>

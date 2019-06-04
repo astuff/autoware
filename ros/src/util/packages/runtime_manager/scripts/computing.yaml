@@ -49,6 +49,7 @@ subs :
         desc : ndt_matching desc sample
         cmd  : roslaunch lidar_localizer ndt_matching.launch
         param: ndt
+        # for param section, search for /config/ndt
         gui  :
           dialog_height : 550
           stat_topic : [ /NDTStat.ndt_stat.exe_time ]
@@ -74,18 +75,18 @@ subs :
         desc : Monitors NDT localizer. Halts or resets localization if algorithm fails. Works better with GNSS.
         cmd  : roslaunch lidar_localizer ndt_matching_monitor.launch
         param: ndt_matching_monitor
-      - name : icp_matching
-        cmd  : roslaunch lidar_localizer icp_matching.launch
-        param: icp
-        gui  :
-          dialog_height : 400
+      # - name : icp_matching
+      #   cmd  : roslaunch lidar_localizer icp_matching.launch
+      #   param: icp
+      #   gui  :
+      #     dialog_height : 400
 
     - name : autoware_connector
       desc : autoware_connector desc sample
       subs :
-      - name : can2odom
-        desc : can2odom desc sample
-        cmd  : roslaunch autoware_connector can2odom.launch
+      # - name : can2odom
+      #   desc : can2odom desc sample
+      #   cmd  : roslaunch autoware_connector can2odom.launch
       - name : vel_pose_connect
         desc : vel_pose_connect desc sample
         cmd  : roslaunch autoware_connector vel_pose_connect.launch
@@ -105,72 +106,72 @@ subs :
   - name : Detection
     desc : Detection desc sample
     subs :
-    - name : vision_detector
-      desc : vision_detector desc sample
-      subs :
+    # - name : vision_detector
+    #   desc : vision_detector desc sample
+    #   subs :
 
-      - name : vision_dpm_ttic_detect
-        desc : vision_dpm_ttic_detect desc sample
-        cmd  : roslaunch vision_dpm_ttic_detect vision_dpm_ttic_detect.launch
-        param: dpm_ttic
-        gui  :
-          flags                  : [ open_dialog, need_camera_info ]
-          config_dialog          : MyDialogCarPedestrian
-          car_pedestrian_obj_key : { car : car_dpm, pedestrian : pedestrian_dpm }
-          open_dialog            : MyDialogDPM
-          use_gpu :
-            flags  : [ nl ]
-          car :
-            user_category : Detection Target
-          pedestrian :
-            border : 16
-            flags  : [ left ]
-          part_model_car :
-            flags  : [ hline ]
-          sel_cam_dialog_only : [ camera_id ]
-          sel_cam_dialog_allow: [ camera_id ]
-          camera_id :
-            border : 16
-            flags : [ all ]
-          sync :
-            func : self.button_synchronization.GetValue()
-      - name : vision_ssd_detect
-        desc : vision_ssd_detect desc sample
-        cmd  : roslaunch vision_ssd_detect vision_ssd_detect.launch
-        param: ssd
-        gui   :
-          flags : [ need_camera_info ]
-          sel_cam_dialog_only : [ camera_id ]
-          sel_cam_dialog_allow: [ camera_id ]
-          camera_id :
-            border : 16
-            flags : [ all ]
+    #   - name : vision_dpm_ttic_detect
+    #     desc : vision_dpm_ttic_detect desc sample
+    #     cmd  : roslaunch vision_dpm_ttic_detect vision_dpm_ttic_detect.launch
+    #     param: dpm_ttic
+    #     gui  :
+    #       flags                  : [ open_dialog, need_camera_info ]
+    #       config_dialog          : MyDialogCarPedestrian
+    #       car_pedestrian_obj_key : { car : car_dpm, pedestrian : pedestrian_dpm }
+    #       open_dialog            : MyDialogDPM
+    #       use_gpu :
+    #         flags  : [ nl ]
+    #       car :
+    #         user_category : Detection Target
+    #       pedestrian :
+    #         border : 16
+    #         flags  : [ left ]
+    #       part_model_car :
+    #         flags  : [ hline ]
+    #       sel_cam_dialog_only : [ camera_id ]
+    #       sel_cam_dialog_allow: [ camera_id ]
+    #       camera_id :
+    #         border : 16
+    #         flags : [ all ]
+    #       sync :
+    #         func : self.button_synchronization.GetValue()
+    #   - name : vision_ssd_detect
+    #     desc : vision_ssd_detect desc sample
+    #     cmd  : roslaunch vision_ssd_detect vision_ssd_detect.launch
+    #     param: ssd
+    #     gui   :
+    #       flags : [ need_camera_info ]
+    #       sel_cam_dialog_only : [ camera_id ]
+    #       sel_cam_dialog_allow: [ camera_id ]
+    #       camera_id :
+    #         border : 16
+    #         flags : [ all ]
 
-      - name : vision_darknet_yolo3
-        desc : Darknet Yolo3 Image based detector
-        cmd  : roslaunch vision_darknet_detect vision_yolo3_detect.launch
-        param: darknet_yolo3
-        gui  :
-          dialog_height : 350
+    #   - name : vision_darknet_yolo3
+    #     desc : Darknet Yolo3 Image based detector
+    #     cmd  : roslaunch vision_darknet_detect vision_yolo3_detect.launch
+    #     param: darknet_yolo3
+    #     gui  :
+    #       dialog_height : 350
 
-      - name : vision_darknet_yolo2
-        desc : Darknet Yolo2 Image based detector
-        cmd  : roslaunch vision_darknet_detect vision_yolo2_detect.launch
-        param: darknet_yolo2
-        gui  :
-          dialog_height : 350
+    #   - name : vision_darknet_yolo2
+    #     desc : Darknet Yolo2 Image based detector
+    #     cmd  : roslaunch vision_darknet_detect vision_yolo2_detect.launch
+    #     param: darknet_yolo2
+    #     gui  :
+    #       dialog_height : 350
 
 
-    - name : vision_tracker
-      desc : vision_tracker desc sample
-      subs :
-      - name : vision_beyond_track
-        desc : Beyond Pixel based object tracker
-        cmd  : roslaunch vision_beyond_track vision_beyond_track.launch
-        param: vision_beyond_track_params
-        gui  :
-          camera_info_src :
-            flags  : [ nl ]
+    # - name : vision_tracker
+    #   desc : vision_tracker desc sample
+    #   subs :
+    #   - name : vision_beyond_track
+    #     desc : Beyond Pixel based object tracker
+    #     cmd  : roslaunch vision_beyond_track vision_beyond_track.launch
+    #     param: vision_beyond_track_params
+    #     gui  :
+    #       camera_info_src :
+    #         flags  : [ nl ]
 
     - name : lidar_detector
       desc : lidar_detector desc sample
@@ -188,59 +189,59 @@ subs :
             flags : [nl ]
           sync :
             func : self.button_synchronization.GetValue()
-      - name : lidar_cnn_baidu_detect
-        desc : lidar_cnn_segmentation_baidu_detect. Requires Caffe framework
-        cmd  : roslaunch lidar_apollo_cnn_seg_detect lidar_apollo_cnn_seg_detect.launch
-        param: lidar_cnn_baidu_params
-      - name : lidar_point_pillars
-        desc : lidar_point_pillars. Requires CUDA and TensorRT
-        cmd  : roslaunch lidar_point_pillars lidar_point_pillars.launch
-        param: lidar_point_pillars_params
-      - name : lidar_naive_l_shape_detect
-        desc : lidar_naive_l_shape_detect desc sample
-        cmd  : roslaunch lidar_naive_l_shape_detect lidar_naive_l_shape_detect.launch
-        param: lidar_naive_l_shape_detect_param
-        gui  :
-          sync :
-            func : self.button_synchronization.GetValue()
-      - name : lidar_shape_estimation
-        desc : lidar_shape_estimation desc sample
-        cmd  : roslaunch lidar_shape_estimation shape_estimation_clustering.launch
-        param: lidar_shape_estimation_param
-        gui  :
-          sync :
-            func : self.button_synchronization.GetValue()
-      - name : lidar_fake_perception
-        desc : lidar_fake_perception desc sample
-        cmd  : roslaunch lidar_fake_perception lidar_fake_perception.launch
-        param: lidar_fake_perception_param
-        gui  :
-          sync :
-            func : self.button_synchronization.GetValue()
+      # - name : lidar_cnn_baidu_detect
+      #   desc : lidar_cnn_segmentation_baidu_detect. Requires Caffe framework
+      #   cmd  : roslaunch lidar_apollo_cnn_seg_detect lidar_apollo_cnn_seg_detect.launch
+      #   param: lidar_cnn_baidu_params
+      # - name : lidar_point_pillars
+      #   desc : lidar_point_pillars. Requires CUDA and TensorRT
+      #   cmd  : roslaunch lidar_point_pillars lidar_point_pillars.launch
+      #   param: lidar_point_pillars_params
+      # - name : lidar_naive_l_shape_detect
+      #   desc : lidar_naive_l_shape_detect desc sample
+      #   cmd  : roslaunch lidar_naive_l_shape_detect lidar_naive_l_shape_detect.launch
+      #   param: lidar_naive_l_shape_detect_param
+      #   gui  :
+      #     sync :
+      #       func : self.button_synchronization.GetValue()
+      # - name : lidar_shape_estimation
+      #   desc : lidar_shape_estimation desc sample
+      #   cmd  : roslaunch lidar_shape_estimation shape_estimation_clustering.launch
+      #   param: lidar_shape_estimation_param
+      #   gui  :
+      #     sync :
+      #       func : self.button_synchronization.GetValue()
+      # - name : lidar_fake_perception
+      #   desc : lidar_fake_perception desc sample
+      #   cmd  : roslaunch lidar_fake_perception lidar_fake_perception.launch
+      #   param: lidar_fake_perception_param
+      #   gui  :
+      #     sync :
+      #       func : self.button_synchronization.GetValue()
 
-    - name : fusion_tools
-      desc : fusion_tools
-      subs :
-      - name : pixel_cloud_fusion
-        desc : Creates a colored point cloud with the help of the intrinsic and extrinsic parameters
-        cmd  : roslaunch pixel_cloud_fusion pixel_cloud_fusion.launch
-        param: pixel_cloud_fusion_params
-        gui  :
-          points_src:
-            flags: [nl]
-          image_src:
-            flags: [nl]
-      - name : range_vision_fusion
-        desc : Combines the 2D and 3D detection results
-        cmd  : roslaunch range_vision_fusion range_vision_fusion.launch
-        param: range_vision_fusion_params
-        gui  :
-          detected_objects_range:
-            flags: [nl]
-          detected_objects_vision:
-            flags: [nl]
-          camera_info_src:
-            flags: [nl]
+    # - name : fusion_tools
+    #   desc : fusion_tools
+    #   subs :
+    #   - name : pixel_cloud_fusion
+    #     desc : Creates a colored point cloud with the help of the intrinsic and extrinsic parameters
+    #     cmd  : roslaunch pixel_cloud_fusion pixel_cloud_fusion.launch
+    #     param: pixel_cloud_fusion_params
+    #     gui  :
+    #       points_src:
+    #         flags: [nl]
+    #       image_src:
+    #         flags: [nl]
+    #   - name : range_vision_fusion
+    #     desc : Combines the 2D and 3D detection results
+    #     cmd  : roslaunch range_vision_fusion range_vision_fusion.launch
+    #     param: range_vision_fusion_params
+    #     gui  :
+    #       detected_objects_range:
+    #         flags: [nl]
+    #       detected_objects_vision:
+    #         flags: [nl]
+    #       camera_info_src:
+    #         flags: [nl]
 
     - name : lidar_tracker
       desc : lidar_tracker desc sample
@@ -282,11 +283,48 @@ subs :
             border : 16
             flags : [ all ]
 
-      - name : region_tlr
-        desc : region_tlr desc sample
-        cmd  : roslaunch trafficlight_recognizer traffic_light_recognition.launch
-        param: region_tlr
-        gui  :
+      # - name : region_tlr
+      #   desc : region_tlr desc sample
+      #   cmd  : roslaunch trafficlight_recognizer traffic_light_recognition.launch
+      #   param: region_tlr
+      #   gui  :
+      #     flags : [ need_camera_info ]
+      #     sel_cam_dialog_only : [ camera_id ]
+      #     sel_cam_dialog_allow: [ camera_id ]
+      #     camera_id :
+      #       border : 16
+      #       flags : [ all ]
+
+      # - name : region_tlr_mxnet
+      #   desc : region_tlr_mxnet desc sample
+      #   cmd  : roslaunch trafficlight_recognizer traffic_light_recognition_mxnet.launch
+      #   param: region_tlr_mxnet
+      #   gui  :
+      #     flags : [ need_camera_info ]
+      #     sel_cam_dialog_only : [ camera_id ]
+      #     sel_cam_dialog_allow: [ camera_id ]
+      #     camera_id :
+      #       border : 16
+      #       flags : [ all ]
+
+      # - name : region_tlr_ssd
+      #   desc : region_tlr_ssd desc sample
+      #   cmd  : roslaunch trafficlight_recognizer traffic_light_recognition_ssd.launch
+      #   param : region_tlr_ssd
+      #   gui  :
+      #     flags : [ no_link, need_camera_info ]
+      #     sel_cam_dialog_only : [ camera_id ]
+      #     sel_cam_dialog_allow: [ camera_id ]
+      #     camera_id :
+      #       border : 16
+      #       flags : [ all ]
+
+      - name : region_tlr_tensorflow
+        desc : Tensorflow traffic light recognizer
+        cmd : roslaunch trafficlight_recognizer traffic_light_recognition_tensorflow.launch
+        #cmd : roslaunch trafficlight_recognizer traffic_light_recognizer_tensorflow.launch
+        param : region_tlr_tensorflow
+        gui :
           flags : [ need_camera_info ]
           sel_cam_dialog_only : [ camera_id ]
           sel_cam_dialog_allow: [ camera_id ]
@@ -294,111 +332,88 @@ subs :
             border : 16
             flags : [ all ]
 
-      - name : region_tlr_mxnet
-        desc : region_tlr_mxnet desc sample
-        cmd  : roslaunch trafficlight_recognizer traffic_light_recognition_mxnet.launch
-        param: region_tlr_mxnet
-        gui  :
-          flags : [ need_camera_info ]
-          sel_cam_dialog_only : [ camera_id ]
-          sel_cam_dialog_allow: [ camera_id ]
-          camera_id :
-            border : 16
-            flags : [ all ]
 
-      - name : region_tlr_ssd
-        desc : region_tlr_ssd desc sample
-        cmd  : roslaunch trafficlight_recognizer traffic_light_recognition_ssd.launch
-        param : region_tlr_ssd
-        gui  :
-          flags : [ no_link, need_camera_info ]
-          sel_cam_dialog_only : [ camera_id ]
-          sel_cam_dialog_allow: [ camera_id ]
-          camera_id :
-            border : 16
-            flags : [ all ]
+  # - name : Semantics
+  #   desc : Semantics desc sample
+  #   subs :
+  #   - name : laserscan2costmap
+  #     desc : laserscan2costmap desc sample
+  #     cmd  : roslaunch object_map laserscan2costmap.launch
+  #     param: laserscan2costmap
+  #     gui  :
+  #       scan_topic:
+  #         flags : [ nl ]
 
-  - name : Semantics
-    desc : Semantics desc sample
-    subs :
-    - name : laserscan2costmap
-      desc : laserscan2costmap desc sample
-      cmd  : roslaunch object_map laserscan2costmap.launch
-      param: laserscan2costmap
-      gui  :
-        scan_topic:
-          flags : [ nl ]
+  #   - name : points2costmap
+  #     desc : points2costmap desc sample
+  #     cmd  : roslaunch object_map points2costmap.launch
+  #     param: points2costmap
 
-    - name : points2costmap
-      desc : points2costmap desc sample
-      cmd  : roslaunch object_map points2costmap.launch
-      param: points2costmap
+  #   - name : potential_field
+  #     desc : potential_field desc sample
+  #     cmd  : roslaunch object_map potential_field.launch
+  #     param: potential_field
 
-    - name : potential_field
-      desc : potential_field desc sample
-      cmd  : roslaunch object_map potential_field.launch
-      param: potential_field
+  #   - name : grid_map_filter
+  #     desc : filter OccupancyGrid with some functions
+  #     cmd  : roslaunch object_map grid_map_filter.launch
+  #     param: grid_map_filter
+  #     gui  :
+  #       map_topic :
+  #         flags : [nl ]
+  #       use_wayarea :
+  #         flags : [nl ]
+  #       dist_transform_distance:
+  #         depend : use_dist_transform
+  #         depend_bool : 'lambda v : v == 1'
+  #       fill_circle_cost_threshold:
+  #         depend : use_fill_circle
+  #         depend_bool : 'lambda v : v == 1'
+  #       circle_radius:
+  #         depend : use_fill_circle
+  #         depend_bool : 'lambda v : v == 1'
+  #       map_frame:
+  #         depend : use_wayarea
+  #         depend_bool : 'lambda v : v == 1'
 
-    - name : grid_map_filter
-      desc : filter OccupancyGrid with some functions
-      cmd  : roslaunch object_map grid_map_filter.launch
-      param: grid_map_filter
-      gui  :
-        map_topic :
-          flags : [nl ]
-        use_wayarea :
-          flags : [nl ]
-        dist_transform_distance:
-          depend : use_dist_transform
-          depend_bool : 'lambda v : v == 1'
-        fill_circle_cost_threshold:
-          depend : use_fill_circle
-          depend_bool : 'lambda v : v == 1'
-        circle_radius:
-          depend : use_fill_circle
-          depend_bool : 'lambda v : v == 1'
-        map_frame:
-          depend : use_wayarea
-          depend_bool : 'lambda v : v == 1'
+  #   - name : wayarea2grid
+  #     desc : convert wayarea to OccupancyGrid
+  #     cmd  : roslaunch object_map wayarea2grid.launch
+  #     param: wayarea2grid
 
-    - name : wayarea2grid
-      desc : convert wayarea to OccupancyGrid
-      cmd  : roslaunch object_map wayarea2grid.launch
-      param: wayarea2grid
+  #   - name : road_occupancy_processor
+  #     desc : Generates the occupancy grid indicating the status of the road
+  #     cmd  : roslaunch road_occupancy_processor road_occupancy_processor.launch
+  #     param: road_occupancy_processor
+  #     gui  :
+  #       wayarea_topic_src :
+  #         flags : [nl ]
+  #       sync :
+  #         func : self.button_synchronization.GetValue()
 
-    - name : road_occupancy_processor
-      desc : Generates the occupancy grid indicating the status of the road
-      cmd  : roslaunch road_occupancy_processor road_occupancy_processor.launch
-      param: road_occupancy_processor
-      gui  :
-        wayarea_topic_src :
-          flags : [nl ]
-        sync :
-          func : self.button_synchronization.GetValue()
+  #   - name : costmap_generator
+  #     desc : costmap_generator desc sample
+  #     cmd  : roslaunch costmap_generator costmap_generator.launch
+  #     param: costmap_generator_param
+  #     gui  :
+  #       dialog_width  : 400
+  #       dialog_height : 400
+  #       sync :
+  #         func : self.button_synchronization.GetValue()
 
-    - name : costmap_generator
-      desc : costmap_generator desc sample
-      cmd  : roslaunch costmap_generator costmap_generator.launch
-      param: costmap_generator_param
-      gui  :
-        dialog_width  : 400
-        dialog_height : 400
-        sync :
-          func : self.button_synchronization.GetValue()
-
-  - name : Prediction
-    desc : Prediction desc sample
-    subs :
-    - name: motion_predictor
-      desc: motion_predictor desc samples
-      subs:
-      - name : naive_motion_predict
-        desc : naive_motion_predict desc sample
-        cmd  : roslaunch naive_motion_predict naive_motion_predict.launch
-        param: naive_motion_predict_param
-        gui  :
-          sync :
-            func : self.button_synchronization.GetValue()
+  # - name : Prediction
+  #   desc : Prediction desc sample
+  #   subs :
+  #   - name: motion_predictor
+  #     desc: motion_predictor desc samples
+  #     subs:
+  #     - name : naive_motion_predict
+  #       desc : naive_motion_predict desc sample
+  #       cmd  : roslaunch naive_motion_predict naive_motion_predict.launch
+  #       param: naive_motion_predict_param
+  #       gui  :
+  #         sync :
+  #           func : self.button_synchronization.GetValue()
 
 - subs :
   - name : Mission Planning
@@ -432,37 +447,19 @@ subs :
         desc : astar_navi desc sample
         cmd  : roslaunch freespace_planner astar_navi.launch
         param: astar_navi_param
-#    - name : way_planner (OpenPlanner - old ver)
-#      desc : Global planner for OpenPlanner
-#      subs :
-#      - name : way_planner
-#        desc : for global planning
-#        cmd  : roslaunch way_planner way_planner.launch
-#        param: way_planner
-    - name : OpenPlanner - Global Planning
-      desc : Global planner for OpenPlanner
-      subs :
-      - name : op_global_planner
-        desc : global planner node from OpenPlanner
-        cmd  : roslaunch op_global_planner op_global_planner.launch
-        param: op_global_planner
+
+    # - name : OpenPlanner - Global Planning
+    #   desc : Global planner for OpenPlanner
+    #   subs :
+    #   - name : op_global_planner
+    #     desc : global planner node from OpenPlanner
+    #     cmd  : roslaunch op_global_planner op_global_planner.launch
+    #     param: op_global_planner
 
 
   - name : Motion Planning
     desc : Motion Planning desc sample
     subs :
-#    - name : dp_planner (OpenPlanner - old ver)
-#      desc : Local Planner for OpenPlanner
-#      subs :
-#      - name : dp_planner
-#        desc : for behavior and path planning
-#        cmd  : roslaunch dp_planner dp_planner.launch
-#        param: dp_planner
-#      - name : ff_waypoint_follower
-#        desc : Feedforward PID waypoint follower
-#        cmd  : roslaunch ff_waypoint_follower ffwaypointfollower_car.launch
-#        param: ff_waypoint_follower
-
     - name : waypoint_maker
       desc : waypoint_maker desc sample
       subs :
@@ -620,105 +617,105 @@ subs :
            position_error :
              flags : [ nl ]
 
-    - name : OpenPlanner - Local planning
-      desc : Local Planner for OpenPlanner
-      subs :
-      - name : op_common_params
-        desc : load common local planning parameters
-        cmd  : roslaunch op_local_planner op_common_params.launch
-        param: op_common_params
-        gui  :
-          dialog_width  : 600
-          dialog_height : 550
-      - name : op_trajectory_generator
-        desc : generating candidate rollout trajectory from global path
-        cmd  : roslaunch op_local_planner op_trajectory_generator.launch
-        param: op_trajectory_generator
-      - name : op_motion_predictor
-        desc : predict behavior and trajectories for moving vehicles
-        cmd  : roslaunch op_local_planner op_motion_predictor.launch
-        param: op_motion_predictor
-      - name : op_trajectory_evaluator
-        desc : evaluate candidate rollout trajectory against the tracked obstacles
-        cmd  : roslaunch op_local_planner op_trajectory_evaluator.launch
-        param: op_trajectory_evaluator
-      - name : op_behavior_selector
-        desc : Decision making by selecting best behavior for local planner
-        cmd  : roslaunch op_local_planner op_behavior_selector.launch
+    # - name : OpenPlanner - Local planning
+    #   desc : Local Planner for OpenPlanner
+    #   subs :
+    #   - name : op_common_params
+    #     desc : load common local planning parameters
+    #     cmd  : roslaunch op_local_planner op_common_params.launch
+    #     param: op_common_params
+    #     gui  :
+    #       dialog_width  : 600
+    #       dialog_height : 550
+    #   - name : op_trajectory_generator
+    #     desc : generating candidate rollout trajectory from global path
+    #     cmd  : roslaunch op_local_planner op_trajectory_generator.launch
+    #     param: op_trajectory_generator
+    #   - name : op_motion_predictor
+    #     desc : predict behavior and trajectories for moving vehicles
+    #     cmd  : roslaunch op_local_planner op_motion_predictor.launch
+    #     param: op_motion_predictor
+    #   - name : op_trajectory_evaluator
+    #     desc : evaluate candidate rollout trajectory against the tracked obstacles
+    #     cmd  : roslaunch op_local_planner op_trajectory_evaluator.launch
+    #     param: op_trajectory_evaluator
+    #   - name : op_behavior_selector
+    #     desc : Decision making by selecting best behavior for local planner
+    #     cmd  : roslaunch op_local_planner op_behavior_selector.launch
 
-    - name : OpenPlanner - Utilities
-      desc : Testing UI, Loggers , ..
-      subs :
-      - name : op_pose2tf
-        desc : Publish transformation from ndt_pose read from rosbag file
-        cmd  : roslaunch op_utilities op_pose2tf.launch
-        param: op_pose2tf
-      - name : op_bag_player
-        desc : Send step by step simulation signal, read ready for localization rosbags and navigate them frame by frame
-        cmd  : roslaunch op_utilities op_bag_player.launch
-        param: op_bag_player
-    - name : OpenPlanner - Simulator
-      desc : Car, Signs, Detection Simulation for OpenPlanner Test
-      subs :
-      - name : op_perception_simulator
-        desc : Simulate euclidean cluster for LIDAR based object detection of simulated cars
-        cmd  : roslaunch op_simulation_package op_perception_simulator.launch
-        param: op_perception_simulator
-      - name : op_signs_simulator
-        desc : Simulate traffic Signs status for intersections included in the map
-        cmd  : roslaunch op_simulation_package op_signs_simulator.launch
-        param: op_signs_simulator
-      - name : op_car_simulator
-        desc : Simulate a car using OpenPlanner
-        cmd  : roslaunch op_simulation_package op_car_simulator_1.launch
-        param: op_car_simulator
-        gui  :
-          dialog_width  : 600
-          dialog_height : 550
-    - name : lattice_planner
-      desc : lattice_planner desc sample
-      subs :
-      - name : lattice_velocity_set
-        desc : lattice_velocity_set desc sample
-        cmd  : roslaunch lattice_planner lattice_velocity_set.launch
-        param: lattice_velocity_set
-        gui  :
-          dialog_width  : 600
-          dialog_height : 450
-          use_crosswalk_detection : { border : 4, flags : [ all ] }
-      - name : path_select
-        desc : path_select desc sample
-        cmd  : rosrun lattice_planner path_select
-      - name : lattice_trajectory_gen
-        desc : lattice_trajectory_gen desc sample
-        cmd  : roslaunch lattice_planner lattice_trajectory_gen.launch
-        param: lane_follower_trajgen
-        gui  :
-          dialog_width  : 600
-          dialog_height : 450
-          velocity:
-            depend : param_flag
-            depend_bool : 'lambda v : v == 1'
-          lookahead_threshold:
-            depend : param_flag
-            depend_bool : 'lambda v : v == 1'
-          minimum_lookahead_threshold:
-            depend : param_flag
-            depend_bool : 'lambda v : v == 0'
-          threshold_ratio:
-            depend : param_flag
-            depend_bool : 'lambda v : v == 0'
-          stat_topic : [ lf ]
-      - name : lattice_twist_convert
-        desc : lattice_twist_convert desc sample
-        cmd  : rosrun lattice_planner lattice_twist_convert
+    # - name : OpenPlanner - Utilities
+    #   desc : Testing UI, Loggers , ..
+    #   subs :
+    #   - name : op_pose2tf
+    #     desc : Publish transformation from ndt_pose read from rosbag file
+    #     cmd  : roslaunch op_utilities op_pose2tf.launch
+    #     param: op_pose2tf
+    #   - name : op_bag_player
+    #     desc : Send step by step simulation signal, read ready for localization rosbags and navigate them frame by frame
+    #     cmd  : roslaunch op_utilities op_bag_player.launch
+    #     param: op_bag_player
+    # - name : OpenPlanner - Simulator
+    #   desc : Car, Signs, Detection Simulation for OpenPlanner Test
+    #   subs :
+    #   - name : op_perception_simulator
+    #     desc : Simulate euclidean cluster for LIDAR based object detection of simulated cars
+    #     cmd  : roslaunch op_simulation_package op_perception_simulator.launch
+    #     param: op_perception_simulator
+    #   - name : op_signs_simulator
+    #     desc : Simulate traffic Signs status for intersections included in the map
+    #     cmd  : roslaunch op_simulation_package op_signs_simulator.launch
+    #     param: op_signs_simulator
+    #   - name : op_car_simulator
+    #     desc : Simulate a car using OpenPlanner
+    #     cmd  : roslaunch op_simulation_package op_car_simulator_1.launch
+    #     param: op_car_simulator
+    #     gui  :
+    #       dialog_width  : 600
+    #       dialog_height : 550
+    # - name : lattice_planner
+    #   desc : lattice_planner desc sample
+    #   subs :
+    #   - name : lattice_velocity_set
+    #     desc : lattice_velocity_set desc sample
+    #     cmd  : roslaunch lattice_planner lattice_velocity_set.launch
+    #     param: lattice_velocity_set
+    #     gui  :
+    #       dialog_width  : 600
+    #       dialog_height : 450
+    #       use_crosswalk_detection : { border : 4, flags : [ all ] }
+    #   - name : path_select
+    #     desc : path_select desc sample
+    #     cmd  : rosrun lattice_planner path_select
+    #   - name : lattice_trajectory_gen
+    #     desc : lattice_trajectory_gen desc sample
+    #     cmd  : roslaunch lattice_planner lattice_trajectory_gen.launch
+    #     param: lane_follower_trajgen
+    #     gui  :
+    #       dialog_width  : 600
+    #       dialog_height : 450
+    #       velocity:
+    #         depend : param_flag
+    #         depend_bool : 'lambda v : v == 1'
+    #       lookahead_threshold:
+    #         depend : param_flag
+    #         depend_bool : 'lambda v : v == 1'
+    #       minimum_lookahead_threshold:
+    #         depend : param_flag
+    #         depend_bool : 'lambda v : v == 0'
+    #       threshold_ratio:
+    #         depend : param_flag
+    #         depend_bool : 'lambda v : v == 0'
+    #       stat_topic : [ lf ]
+    #   - name : lattice_twist_convert
+    #     desc : lattice_twist_convert desc sample
+    #     cmd  : rosrun lattice_planner lattice_twist_convert
 
   - name : Decision
     desc : decision groups
     subs :
-    - name : state_machine(old)
-      desc : state_machine desc sample
-      cmd  : roslaunch state_machine state_machine.launch
+    # - name : state_machine(old)
+    #   desc : state_machine desc sample
+    #   cmd  : roslaunch state_machine state_machine.launch
     - name : decision_maker(experimental)
       desc : decision_maker desc sample
       cmd  : roslaunch decision_maker decision_maker.launch
@@ -1413,7 +1410,9 @@ params :
       desc      : Use Odometry to try to reduce errors (read from /odom_pose)
       label     : Use Odometry
       kind      : checkbox
-      v         : False
+      v         : True
+      # v         : False
+
       cmd_param :
         dash      : ''
         delim     : ':='
@@ -1446,7 +1445,8 @@ params :
       desc      : get_height desc sample
       label     : Get Height
       kind      : checkbox
-      v         : False
+      # v         : False
+      v         : True
       cmd_param :
         dash      : ''
         delim     : ':='
@@ -1554,7 +1554,8 @@ params :
       desc      : topic_twist_stamped desc sample
       label     : /current_velocity (geometry_msgs/TwistStamped)
       kind      : str
-      v         : /estimate_twist
+      # v         : /estimate_twist
+      v         : /vehicle/twist
       cmd_param :
          dash    : ''
          delim   : ':='
@@ -1580,7 +1581,8 @@ params :
       descs :
       - Waypoint desc sample
       - Dialog desc sample
-      v     : 1
+      # v     : 1
+      v     : 0
     - name  : velocity
       desc  : velocity desc sample
       label : Velocity
@@ -1629,7 +1631,8 @@ params :
       desc    : linear_interpolate_mode desc sample
       label   : 'Publishes topic for steering robot'
       kind    : checkbox
-      v       : False
+      # v       : False
+      v       : True
       cmd_param :
         dash        : ''
         delim       : ':='
@@ -1737,7 +1740,8 @@ params :
       label : Points Threshold
       min   : 0
       max   : 30
-      v     : 5
+      # v     : 5
+      v     : 15
     - name  : detection_height_top
       desc  : detection_height_top desc sample
       label : Detection Height Top (m)
@@ -1915,7 +1919,8 @@ params :
       label   : 'lateral_accel_limit :'
       min   : 0
       max   : 5.0
-      v         : 0.8
+      # v         : 0.8
+      v         : 3.0
     - name    : lowpass_gain_linear_x
       desc    : lowpass_gain_linear_x  desc sample
       label   : 'lowpass_gain_linear_x :'
@@ -2303,6 +2308,29 @@ params :
         delim        : ':='
         only_enable  : True
 
+  - name : region_tlr_tensorflow
+    vars :
+    - name         : camera_id
+      desc         : camera_id desc sample
+      kind         : menu
+      label        : Camera ID
+      choices_type : str
+      v            : ''
+      cmd_param    :
+        dash         : ''
+        delim        : ':='
+        only_enable  : True
+    - name      : tensorflow_weights_file
+      desc      : Re-Click region level box to apply path changes
+      label     : Tensorflow weights file
+      kind      : path
+      path_type : multi
+      v         : /tmp/model.h5
+      cmd_param :
+        dash        : ''
+        delim       : ':='
+
+
   - name : region_tlr_mxnet
     topic: /config/superimpose
     msg  : Bool
@@ -2448,7 +2476,8 @@ params :
       desc  : traffic_light desc sample
       v     : 1
     - name  : lane_stop
-      v     : False
+      # v     : False
+      v     : True
 
   - name  : lane_select
     topic : /config/lane_select
@@ -3611,7 +3640,8 @@ params :
       label     : 'multi_lane'
       kind      : path
       path_type : multi
-      v         : /tmp/driving_lane.csv
+      # v         : /tmp/driving_lane.csv
+      v         : /home/autoware/aw_standard_ws/src/as_aw_pkgs/aw_data/path
       cmd_param :
         dash        : ''
         delim       : ':='

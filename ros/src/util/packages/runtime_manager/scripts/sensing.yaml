@@ -1,79 +1,79 @@
 name : Drivers
 desc : Drivers desc sample
 subs :
-  - name : CAN
-    desc : CAN desc sample
-    subs :
-      - name : can_converter
-        desc : can_converter desc sample
-        probe:
-        run  : rosrun kvaser can_converter
-      - name : can_draw
-        desc : can_draw desc sample
-        probe:
-        run  : rosrun kvaser can_draw
-      - name : can_listener
-        desc : can_listener desc sample
-        probe:
-        run  : rosrun kvaser can_listener
-        param: can_listener
+  # - name : CAN
+  #   desc : CAN desc sample
+  #   subs :
+  #     - name : can_converter
+  #       desc : can_converter desc sample
+  #       probe:
+  #       run  : rosrun kvaser can_converter
+  #     - name : can_draw
+  #       desc : can_draw desc sample
+  #       probe:
+  #       run  : rosrun kvaser can_draw
+  #     - name : can_listener
+  #       desc : can_listener desc sample
+  #       probe:
+  #       run  : rosrun kvaser can_listener
+  #       param: can_listener
 
   - name : Cameras
     desc : Cameras desc sample
     subs :
-      - name : PointGrey Grasshoper 3 (USB1)
-        desc : PointGrey Grasshoper 3 (USB1) desc sample
-        probe: 'lsusb -d 1e10: > /dev/null'
-        run  : roslaunch autoware_pointgrey_drivers grasshopper3.launch
-        param: grasshopper3_params
+      # - name : PointGrey Grasshoper 3 (USB1)
+      #   desc : PointGrey Grasshoper 3 (USB1) desc sample
+      #   probe: 'lsusb -d 1e10: > /dev/null'
+      #   run  : roslaunch autoware_pointgrey_drivers grasshopper3.launch
+      #   param: grasshopper3_params
 
       - name : PointGrey Generic
         desc : PointGrey Generic desc sample
         probe:
         run  : roslaunch pointgrey_camera_driver camera.launch
 
-      - name : FLIR ADK
-        desc : Driver for Boson FLIR Thermal camera
-        probe:
-        run  : roslaunch autoware_pointgrey_drivers flir_adk.launch
-        param: fliradk_params
+      # - name : FLIR ADK
+      #   desc : Driver for Boson FLIR Thermal camera
+      #   probe:
+      #   run  : roslaunch autoware_pointgrey_drivers flir_adk.launch
+      #   param: fliradk_params
 
       - name : PointGrey LadyBug 5
         desc : PointGrey LadyBug 5 desc sample
         probe:
         run  : roslaunch autoware_pointgrey_drivers ladybug.launch
         param: ladybug_params
-      
+
       - name : PointGrey Spinnaker
         desc : PointGrey Spinnaker desc sample
         probe:
         run  : roslaunch autoware_pointgrey_drivers spinnaker.launch
         param: spinnaker_params
 
-      - name : USB Generic
-        desc : USB Generic desc sample
-        probe: 'lsusb -v | grep wTerminalType | grep "Camera Sensor" > /dev/null'
-        run  : roslaunch runtime_manager uvc_camera.launch
+      # - name : USB Generic
+      #   desc : USB Generic desc sample
+      #   probe: 'lsusb -v | grep wTerminalType | grep "Camera Sensor" > /dev/null'
+      #   run  : roslaunch runtime_manager uvc_camera.launch
 
-      - name : IEEE1394
-        desc : IEEE1394 desc sample
-        probe:
-        run  :
+      # - name : IEEE1394
+      #   desc : IEEE1394 desc sample
+      #   probe:
+      #   run  :
 
-      - name : Baumer VLG-22
-        desc : Baumer VLG-22 desc sample
-        probe:
-        run  : roslaunch vlg22c_cam baumer.launch
+      # - name : Baumer VLG-22
+      #   desc : Baumer VLG-22 desc sample
+      #   probe:
+      #   run  : roslaunch vlg22c_cam baumer.launch
 
-      - name : IDS UI-3060CP
-        desc : IDS UI-3060CP (Requires official ueye package)
-        probe:
-        run  : roslaunch ueye nodelets.launch
+      # - name : IDS UI-3060CP
+      #   desc : IDS UI-3060CP (Requires official ueye package)
+      #   probe:
+      #   run  : roslaunch ueye nodelets.launch
 
-      - name : Sekonix 3322/3323 GMSLCamera
-        desc : gmsl camera. runs only on PX2
-        probe:
-        run  : roslaunch autoware_driveworks_interface gmsl_interface
+      # - name : Sekonix 3322/3323 GMSLCamera
+      #   desc : gmsl camera. runs only on PX2
+      #   probe:
+      #   run  : roslaunch autoware_driveworks_interface gmsl_interface
 
       - name : AVT Vimba Mako
         desc : Allied Vision Technologies Mako Camera. Requires the installation of avt_vimba_camera package and Vimba SDK.
@@ -83,86 +83,86 @@ subs :
           dialog_height : 350
           flags: [ SIGTERM, kill_children ]
 
-  - name : GNSS
-    desc : GNSS desc sample
-    subs :
-      - name : Javad Delta 3 (TTY1)
-        desc : Javad Delta 3 (TTY1) desc sample
-        probe: 'lsusb -d 0584: > /dev/null' # probed if serial converter is connected
-        run  : roslaunch javad_navsat_driver javad_navsat.launch
-        param: serial
-        gui  :
-          flags : [ kill_children ]
-      - name : Garmin GPS 18x LVC
-        desc : Garmin GPS 18x LVC desc sample
-        probe:
-        run  : rosrun garmin garmin_gps_18x_lvc
-      - name : Serial GNSS
-        desc : Serial GNSS desc sample
-        probe:
-        run  : roslaunch nmea_navsat nmea_navsat.launch
-        param: serial
+  # - name : GNSS
+  #   desc : GNSS desc sample
+  #   subs :
+  #     - name : Javad Delta 3 (TTY1)
+  #       desc : Javad Delta 3 (TTY1) desc sample
+  #       probe: 'lsusb -d 0584: > /dev/null' # probed if serial converter is connected
+  #       run  : roslaunch javad_navsat_driver javad_navsat.launch
+  #       param: serial
+  #       gui  :
+  #         flags : [ kill_children ]
+  #     - name : Garmin GPS 18x LVC
+  #       desc : Garmin GPS 18x LVC desc sample
+  #       probe:
+  #       run  : rosrun garmin garmin_gps_18x_lvc
+  #     - name : Serial GNSS
+  #       desc : Serial GNSS desc sample
+  #       probe:
+  #       run  : roslaunch nmea_navsat nmea_navsat.launch
+  #       param: serial
 
-  - name : IMU
-    desc : IMU desc sample
-    subs :
-      - name : Memsic VG440
-        desc : Memsic VG440 desc sample
-        probe:
-        run  : do_shell_exec "$(rospack find runtime_manager)/scripts/vg440.sh"
-        param: vg440
-        gui  :
-          flags: [ kill_children ]
-      - name : Xsens MTi-300
-        desc : Xsens MTi-300 desc sample
-        probe:
-        run  : do_shell_exec "$(rospack find runtime_manager)/scripts/mti300.sh"
-        param: mti300
-        gui  :
-          flags: [ kill_children ]
-          baud : { flags: [ nl ] }
-          mode : { flags: [ nl ] }
-          frequency: { flags: [ nl ] }
-      - name : MicroStrain 3DM-GX5-15
-        desc : MicroStrain 3DM-GX5-15 desc sample
-        probe:
-        run  : do_shell_exec "$(rospack find runtime_manager)/scripts/3dm_gx5_15.sh"
-        param: 3dm_gx5_15
-        gui  :
-          flags: [ kill_children ]
-          baud : { flags: [ nl ] }
-      - name : Analog Devices ADIS16470
-        desc : Analog Devices ADIS16470
-        probe:
-        run  : do_shell_exec "$(rospack find runtime_manager)/scripts/adis16470.sh"
-        param: adis16470
-        gui  :
-          flags: [ kill_children ]
-          baud : { flags: [ nl ] }
+  # - name : IMU
+  #   desc : IMU desc sample
+  #   subs :
+  #     - name : Memsic VG440
+  #       desc : Memsic VG440 desc sample
+  #       probe:
+  #       run  : do_shell_exec "$(rospack find runtime_manager)/scripts/vg440.sh"
+  #       param: vg440
+  #       gui  :
+  #         flags: [ kill_children ]
+  #     - name : Xsens MTi-300
+  #       desc : Xsens MTi-300 desc sample
+  #       probe:
+  #       run  : do_shell_exec "$(rospack find runtime_manager)/scripts/mti300.sh"
+  #       param: mti300
+  #       gui  :
+  #         flags: [ kill_children ]
+  #         baud : { flags: [ nl ] }
+  #         mode : { flags: [ nl ] }
+  #         frequency: { flags: [ nl ] }
+  #     - name : MicroStrain 3DM-GX5-15
+  #       desc : MicroStrain 3DM-GX5-15 desc sample
+  #       probe:
+  #       run  : do_shell_exec "$(rospack find runtime_manager)/scripts/3dm_gx5_15.sh"
+  #       param: 3dm_gx5_15
+  #       gui  :
+  #         flags: [ kill_children ]
+  #         baud : { flags: [ nl ] }
+  #     - name : Analog Devices ADIS16470
+  #       desc : Analog Devices ADIS16470
+  #       probe:
+  #       run  : do_shell_exec "$(rospack find runtime_manager)/scripts/adis16470.sh"
+  #       param: adis16470
+  #       gui  :
+  #         flags: [ kill_children ]
+  #         baud : { flags: [ nl ] }
 
   - name : LIDARs
     desc : LIDARs desc sample
     subs :
-      - name : Velodyne HDL-64E-S2
-        desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
-        probe: 'ifconfig eth0 | grep "192.168.1.105" > /dev/null'
-        run  : roslaunch runtime_manager velodyne_hdl64e_s2.launch
-        param: calibration_path
-        gui  :
-          flags : [ SIGTERM, kill_children ]
-          calibration :
-            prop  : 0
-            flags : [ center_v ]
-      - name : Velodyne HDL-64E-S3
-        desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
-        probe: 'ifconfig eth0 | grep "192.168.1.105" > /dev/null'
-        run  : roslaunch runtime_manager velodyne_hdl64e_s3.launch
-        param: calibration_path
-        gui  :
-          flags : [ SIGTERM, kill_children ]
-          calibration :
-            prop  : 0
-            flags : [ center_v ]
+      # - name : Velodyne HDL-64E-S2
+      #   desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
+      #   probe: 'ifconfig eth0 | grep "192.168.1.105" > /dev/null'
+      #   run  : roslaunch runtime_manager velodyne_hdl64e_s2.launch
+      #   param: calibration_path
+      #   gui  :
+      #     flags : [ SIGTERM, kill_children ]
+      #     calibration :
+      #       prop  : 0
+      #       flags : [ center_v ]
+      # - name : Velodyne HDL-64E-S3
+      #   desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
+      #   probe: 'ifconfig eth0 | grep "192.168.1.105" > /dev/null'
+      #   run  : roslaunch runtime_manager velodyne_hdl64e_s3.launch
+      #   param: calibration_path
+      #   gui  :
+      #     flags : [ SIGTERM, kill_children ]
+      #     calibration :
+      #       prop  : 0
+      #       flags : [ center_v ]
       - name : Velodyne HDL-32E
         desc : Launches the driver for the selected Velodyne sensor and publishes the pointcloud in points_raw. To select a custom calibration file press the [config] button.
         probe: 'ping -c 1 -W 1 192.168.1.201 > /dev/null'
@@ -203,75 +203,75 @@ subs :
           calibration :
             prop  : 0
             flags : [ center_v ]
-      - name : Hokuyo 2D URG
-        desc : urg_node supports SCIP 2.2 or earlier compliant laser range-finders.
-        run  : roslaunch hokuyo top_urg.launch
-        param: hokuyo_urg
-        gui :
-          frame_id :
-            flags : [nl ]
+      # - name : Hokuyo 2D URG
+      #   desc : urg_node supports SCIP 2.2 or earlier compliant laser range-finders.
+      #   run  : roslaunch hokuyo top_urg.launch
+      #   param: hokuyo_urg
+      #   gui :
+      #     frame_id :
+      #       flags : [nl ]
 
-      - name : Hokuyo 3D-URG
-        desc : Hokuyo 3D-URG desc sample
-        probe:
-        run  : roslaunch hokuyo hokuyo_3d.launch
-        param: hokuyo_3d
+      # - name : Hokuyo 3D-URG
+      #   desc : Hokuyo 3D-URG desc sample
+      #   probe:
+      #   run  : roslaunch hokuyo hokuyo_3d.launch
+      #   param: hokuyo_3d
 
-      - name : Sick LMS511
-        desc : Initializes the Sick LMS511 driver
-        probe:
-        run  : roslaunch sick_driver lms511.launch
-        param: sick_lms511
+      # - name : Sick LMS511
+      #   desc : Initializes the Sick LMS511 driver
+      #   probe:
+      #   run  : roslaunch sick_driver lms511.launch
+      #   param: sick_lms511
 
-      - name : Sick LD-MRS (IBEO Lux)
-        desc : Initializes the Sick LD-MRS driver (identical to IBEO Lux)
-        probe:
-        run  : roslaunch sick_ldmrs_driver sick_ldmrs.launch
-        param: sick_ldmrs
+      # - name : Sick LD-MRS (IBEO Lux)
+      #   desc : Initializes the Sick LD-MRS driver (identical to IBEO Lux)
+      #   probe:
+      #   run  : roslaunch sick_ldmrs_driver sick_ldmrs.launch
+      #   param: sick_ldmrs
 
-      - name : Robosense RS32
-        desc : Launches the driver for the selected RoboSense LiDAR sensor and publishes the pointcloud in rslidar_points.
-        run  : roslaunch rslidar_pointcloud rs_cloud_nodelet_32.launch
+      # - name : Robosense RS32
+      #   desc : Launches the driver for the selected RoboSense LiDAR sensor and publishes the pointcloud in rslidar_points.
+      #   run  : roslaunch rslidar_pointcloud rs_cloud_nodelet_32.launch
 
-      - name : Robosense RS16
-        desc : Launches the driver for the selected RoboSense LiDAR sensor and publishes the pointcloud in rslidar_points.
-        run  : roslaunch rslidar_pointcloud rs_cloud_nodelet_16.launch
+      # - name : Robosense RS16
+      #   desc : Launches the driver for the selected RoboSense LiDAR sensor and publishes the pointcloud in rslidar_points.
+      #   run  : roslaunch rslidar_pointcloud rs_cloud_nodelet_16.launch
 
-      - name : Ouster OS1
-        desc : Launches the driver for the Ouster OS1 LiDAR and publishes the pointcloud as points_raw.
-        run  : roslaunch ouster_ros os1.launch
-        param: ouster_ros
-        gui  :
-          dialog_height : 400
-          flags : [ SIGTERM, kill_children ]
-          lidar_address : 
-             user_category : 'Address'
-             flags: [ expand ]
-          pc_address  : 
-             flags: [ expand, nl ]
-          lidar_frame_name  : 
-             user_category : 'PointCloud'
-             flags: [ expand ]
-          lidar_topic_name  : 
-             flags: [ expand, nl ]
-          imu_frame_name  : 
-             user_category : 'IMU'
-             flags: [ expand ]
-          imu_topic_name  : 
-             flags: [ expand, nl ]
-          operation_mode :
-             user_category : 'Advanced'
-          pulse_mode : { prop: 0 }
-          window_rejection : { flags: [ nl ] }
-          mode_xyzir : 
-             prop  : 0
-             user_category : 'Misc.'
-          replay : { prop  : 0 }
-          
-  - name : Other Sensors
-    desc : Other Sensors desc sample
-    subs :
-      - {}
+      # - name : Ouster OS1
+      #   desc : Launches the driver for the Ouster OS1 LiDAR and publishes the pointcloud as points_raw.
+      #   run  : roslaunch ouster_ros os1.launch
+      #   param: ouster_ros
+      #   gui  :
+      #     dialog_height : 400
+      #     flags : [ SIGTERM, kill_children ]
+      #     lidar_address :
+      #        user_category : 'Address'
+      #        flags: [ expand ]
+      #     pc_address  :
+      #        flags: [ expand, nl ]
+      #     lidar_frame_name  :
+      #        user_category : 'PointCloud'
+      #        flags: [ expand ]
+      #     lidar_topic_name  :
+      #        flags: [ expand, nl ]
+      #     imu_frame_name  :
+      #        user_category : 'IMU'
+      #        flags: [ expand ]
+      #     imu_topic_name  :
+      #        flags: [ expand, nl ]
+      #     operation_mode :
+      #        user_category : 'Advanced'
+      #     pulse_mode : { prop: 0 }
+      #     window_rejection : { flags: [ nl ] }
+      #     mode_xyzir :
+      #        prop  : 0
+      #        user_category : 'Misc.'
+      #     replay : { prop  : 0 }
+
+  # - name : Other Sensors
+  #   desc : Other Sensors desc sample
+  #   subs :
+  #     - {}
 
 cmds:
   subs :
@@ -285,13 +285,13 @@ cmds:
       gui  :
         sync :
           func : self.button_synchronization.GetValue()
-    - name : ring_filter
-      desc : ring_filter desc sample
-      cmd  : roslaunch points_downsampler points_downsample.launch node_name:=ring_filter
-      param: ring_filter
-      gui  :
-        sync :
-          func : self.button_synchronization.GetValue()
+    # - name : ring_filter
+    #   desc : ring_filter desc sample
+    #   cmd  : roslaunch points_downsampler points_downsample.launch node_name:=ring_filter
+    #   param: ring_filter
+    #   gui  :
+    #     sync :
+    #       func : self.button_synchronization.GetValue()
     - name : distance_filter
       desc : distance_filter desc sample
       cmd  : roslaunch points_downsampler points_downsample.launch node_name:=distance_filter
@@ -299,25 +299,25 @@ cmds:
       gui  :
         sync :
           func : self.button_synchronization.GetValue()
-    - name : random_filter
-      desc : random_filter desc sample
-      cmd  : roslaunch points_downsampler points_downsample.launch node_name:=random_filter
-      param: random_filter
-      gui  :
-        sync :
-          func : self.button_synchronization.GetValue()
+    # - name : random_filter
+    #   desc : random_filter desc sample
+    #   cmd  : roslaunch points_downsampler points_downsample.launch node_name:=random_filter
+    #   param: random_filter
+    #   gui  :
+    #     sync :
+    #       func : self.button_synchronization.GetValue()
 
   - name : Points Preprocessor
     desc : Points Preprocessor desc sample
     subs :
-    - name : ring_ground_filter
-      desc : ring_ground_filter performs ground filtering using the ring number contained on each point
-      cmd  : roslaunch points_preprocessor ring_ground_filter.launch node_name:=ring_ground_filter
-      param: ring_ground_filter
-      gui  :
-        dialog_height : 450
-        sync :
-          func : self.button_synchronization.GetValue()
+    # - name : ring_ground_filter
+    #   desc : ring_ground_filter performs ground filtering using the ring number contained on each point
+    #   cmd  : roslaunch points_preprocessor ring_ground_filter.launch node_name:=ring_ground_filter
+    #   param: ring_ground_filter
+    #   gui  :
+    #     dialog_height : 450
+    #     sync :
+    #       func : self.button_synchronization.GetValue()
 
     - name : ray_ground_filter
       desc : ray_ground_filter performs ground filtering using a radial-concentric based approach
@@ -326,52 +326,52 @@ cmds:
       gui  :
         dialog_height : 450
 
-    - name : points_concat_filter
-      desc : points_concat_filter filter performs merging multiple lidar inputs
-      cmd  : roslaunch points_preprocessor points_concat_filter.launch node_name:=points_concat_filter
-      param: points_concat_filter
-      gui  :
-        dialog_width : 300
-        input_topics :
-          flags : [nl ]
-        output_topic :
-          flags : [nl ]
+    # - name : points_concat_filter
+    #   desc : points_concat_filter filter performs merging multiple lidar inputs
+    #   cmd  : roslaunch points_preprocessor points_concat_filter.launch node_name:=points_concat_filter
+    #   param: points_concat_filter
+    #   gui  :
+    #     dialog_width : 300
+    #     input_topics :
+    #       flags : [nl ]
+    #     output_topic :
+    #       flags : [nl ]
 
-    - name : cloud_transformer
-      desc : Transforms cloud points' coordinates to the specified target frame
-      cmd  : roslaunch points_preprocessor cloud_transformer.launch
-      param: cloud_transformer
-      gui  :
-        dialog_width : 300
-        input_point_topic :
-          flags : [nl ]
-        target_frame :
-          flags : [nl ]
+    # - name : cloud_transformer
+    #   desc : Transforms cloud points' coordinates to the specified target frame
+    #   cmd  : roslaunch points_preprocessor cloud_transformer.launch
+    #   param: cloud_transformer
+    #   gui  :
+    #     dialog_width : 300
+    #     input_point_topic :
+    #       flags : [nl ]
+    #     target_frame :
+    #       flags : [nl ]
 
-    - name : compare_map_filter
-      desc : compare_map_filter
-      cmd  : roslaunch points_preprocessor compare_map_filter.launch
-      param: compare_map_filter
-      gui  :
-        dialog_height : 400
-        input_map_topic :
-          flags : [ nl ]
-        input_point_topic :
-          flags : [ nl ]
-        output_match_topic :
-          flags : [ nl ]
-        output_unmatch_topic :
-          flags : [ nl ]
+    # - name : compare_map_filter
+    #   desc : compare_map_filter
+    #   cmd  : roslaunch points_preprocessor compare_map_filter.launch
+    #   param: compare_map_filter
+    #   gui  :
+    #     dialog_height : 400
+    #     input_map_topic :
+    #       flags : [ nl ]
+    #     input_point_topic :
+    #       flags : [ nl ]
+    #     output_match_topic :
+    #       flags : [ nl ]
+    #     output_unmatch_topic :
+    #       flags : [ nl ]
 
-  - name : Fusion
-    desc : Sensor fusion tools
-    subs :
-    - name : multi_lidar_calibrator
-      desc : Performs extrinsic calibration between two point clouds
-      cmd  : roslaunch multi_lidar_calibrator multi_lidar_calibrator.launch
-      param: multi_lidar_calibrator
-      gui  :
-        dialog_height : 450
+  # - name : Fusion
+  #   desc : Sensor fusion tools
+  #   subs :
+  #   - name : multi_lidar_calibrator
+  #     desc : Performs extrinsic calibration between two point clouds
+  #     cmd  : roslaunch multi_lidar_calibrator multi_lidar_calibrator.launch
+  #     param: multi_lidar_calibrator
+  #     gui  :
+  #       dialog_height : 450
 
 buttons:
   calibration_publisher :
@@ -490,7 +490,7 @@ params :
         dash : ''
         delim: ':='
         must : true
-        
+
   - name  : ouster_ros
     vars  :
     - name : lidar_address
@@ -1057,16 +1057,6 @@ params :
       cmd_param :
         dash      : ''
         delim     : ':='
-
-
-#  - name  : camera_extrinsicMat_Publisher
-#    vars  :
-#    - name      : file
-#      kind      : path
-#      v         : ''
-#      cmd_param :
-#        dash : ''
-#        delim: ':='
 
   - name : serial
     vars :
