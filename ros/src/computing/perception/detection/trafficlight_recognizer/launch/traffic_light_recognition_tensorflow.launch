@@ -4,7 +4,7 @@
   <!-- Arguments -->
   <arg name="camera_id" default="camera"/>
   <arg name="nn_model_path" default="$(find aw_platform)/config/model-RGB-009-0.9857.hdf5" />
-  <arg name="image_transport" default="compressed" />
+  <arg name="image_transport" default="raw" />
   <arg name="image_raw_topic" default="$(arg camera_id)/image_raw "/>
   <arg name="use_converted_map" default="false" />
 
